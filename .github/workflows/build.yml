@@ -30,8 +30,16 @@ jobs:
       - name: Publish WPF app
         run: dotnet publish src/DigitalManualSet.App/DigitalManualSet.App.csproj --configuration Release --no-build --output output/publish
 
+      - name: Set artifact name
+        shell: pwsh
+        run: |
+          $year = Get-Date -Format 'yyyy'
+          $dayNumber = (Get-Date).DayOfYear
+          $buildNumber = $env:GITHUB_RUN_NUMBER
+          echo "ARTIFACT_NAME=DigitalManualSet-$year-$dayNumber-$buildNumber" >> $env:GITHUB_ENV
+
       - name: Upload published app
         uses: actions/upload-artifact@v4
         with:
-          name: DigitalManualSet-publish
+          name: ${{ env.ARTIFACT_NAME }}
           path: output/publish
