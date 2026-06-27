@@ -6,4 +6,7 @@
     <Project Path="src/DigitalManualSet.App/DigitalManualSet.App.csproj" />
     <Project Path="src/DigitalManualSet.Core/DigitalManualSet.Core.csproj" Id="c085515c-f3ec-4e2c-9853-15089ff5e02d" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DigitalManualSet.Tests/DigitalManualSet.Tests.csproj" />
+  </Folder>
 </Solution>
