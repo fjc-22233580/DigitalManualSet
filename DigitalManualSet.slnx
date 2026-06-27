@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/DigitalManualSet.App/DigitalManualSet.App.csproj" />
+    <Project Path="src/DigitalManualSet.Core/DigitalManualSet.Core.csproj" Id="c085515c-f3ec-4e2c-9853-15089ff5e02d" />
+  </Folder>
+</Solution>
