@@ -1,4 +1,12 @@
 <Project>
+
+	<PropertyGroup>
+		<Product>Digital Manual Set</Product>
+		<Company>Francisco Castillo</Company>
+		<Authors>Francisco Castillo</Authors>
+		<Description>Proof-of-concept digital documentation delivery system developed for Final Year Project.</Description>
+	</PropertyGroup>
+
 	<PropertyGroup>
 		<BaseOutputPath>$(MSBuildThisFileDirectory)output\build\$(MSBuildProjectName)\</BaseOutputPath>
 	</PropertyGroup>
