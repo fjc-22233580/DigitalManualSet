@@ -1,7 +1,9 @@
-﻿using System.Diagnostics;
+﻿using App;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System.IO;
 using System.Windows;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalManualSet.App
 {
@@ -10,6 +12,8 @@ namespace DigitalManualSet.App
     /// </summary>
     public partial class App : Application
     {
+        private ServiceProvider _serviceProvider;
+
         public App()
         {
         }
@@ -24,7 +28,33 @@ namespace DigitalManualSet.App
 
             InitLogging();
 
+
+            var services = new ServiceCollection();
+
+            ConfigureServices(services);
+
+            _serviceProvider = services.BuildServiceProvider();
+
+            var mainWindow = new MainWindow
+            {
+                // DataContext = _serviceProvider.GetRequiredService<ShellViewModel>()
+            };
+
+            mainWindow.Show();
+
+
             base.OnStartup(e);
+        }
+
+        private void ConfigureServices(IServiceCollection services)
+        {
+           
+            // Add logging to our services.
+            services.AddLogging(builder =>
+            {
+                builder.ClearProviders();
+                builder.AddSerilog();
+            });
         }
 
         /// <summary>
