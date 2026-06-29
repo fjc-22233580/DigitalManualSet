@@ -75,6 +75,7 @@ namespace DigitalManualSet.App
             services.AddSingleton<HomeViewModel>();
             services.AddSingleton<CreatePackageViewModel>();
             services.AddSingleton<OpenPackageViewModel>();
+            services.AddSingleton<SettingsViewModel>();
 
 
         }

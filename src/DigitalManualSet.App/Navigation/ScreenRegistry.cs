@@ -10,6 +10,7 @@ public class ScreenRegistry
     private readonly HomeViewModel _homeViewModel;
     private readonly CreatePackageViewModel _createPackageViewModel;
     private readonly OpenPackageViewModel _openPackageViewModel;
+    private readonly SettingsViewModel _settingsViewModel;
 
     /// <summary>
     /// Initializes a new instance of the ScreenRegistry with the provided view models.
@@ -17,11 +18,13 @@ public class ScreenRegistry
     public ScreenRegistry(
         HomeViewModel homeViewModel,
         CreatePackageViewModel createPackageViewModel,
-        OpenPackageViewModel openPackageViewModel)
+        OpenPackageViewModel openPackageViewModel,
+        SettingsViewModel settingsViewModel)
     {
         _homeViewModel = homeViewModel;
         _createPackageViewModel = createPackageViewModel;
         _openPackageViewModel = openPackageViewModel;
+        _settingsViewModel = settingsViewModel;
     }
 
     /// <summary>
@@ -49,6 +52,12 @@ public class ScreenRegistry
                 Title = "Open Package",
                 Description = "Open a previously saved package.",
                 ViewModel = _openPackageViewModel
+            },
+            new UiScreen
+            {
+                Title = "Settings",
+                Description = "Application Settings.",
+                ViewModel = _settingsViewModel
             }
         ];
     }
