@@ -1,15 +1,17 @@
 ﻿<Application
     x:Class="DigitalManualSet.App.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:App"
-    StartupUri="MainWindow.xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
 
-        <!--  Import fluent styles so UI is inline with WIN11  -->
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+
+                <!--  Import fluent styles so UI is inline with WIN11  -->
                 <ResourceDictionary Source="pack://application:,,,/PresentationFramework.Fluent;component/Themes/Fluent.xaml" />
+
+                <!--  Import data templates to enable global UI - VM resolution  -->
+                <ResourceDictionary Source="/Resources/DataTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
