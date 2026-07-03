@@ -1,11 +1,14 @@
 ﻿using App;
 using DigitalManualSet.App.Navigation;
+using DigitalManualSet.App.Settings;
 using DigitalManualSet.App.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System.IO;
 using System.Windows;
+using DigitalManualSet.App.Common;
+using DigitalManualSet.App.Services;
 
 namespace DigitalManualSet.App
 {
@@ -19,44 +22,45 @@ namespace DigitalManualSet.App
         /// </summary>
         private ServiceProvider _serviceProvider;
 
-
         /// <summary>
         /// Raises the <see cref="E:System.Windows.Application.Startup" /> event.
         /// </summary>
         /// <param name="e">A <see cref="T:System.Windows.StartupEventArgs" /> that contains the event data.</param>
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
-            // Set app theme to dark
-#pragma warning disable WPF0001
-            App.Current.ThemeMode = ThemeMode.Dark;
-#pragma warning restore WPF0001
-
             InitLogging();
+            Log.Information("Application started");
 
-            var services = new ServiceCollection();
-
-            ConfigureServices(services);
-
-            _serviceProvider = services.BuildServiceProvider();
+            ConfigureServices();
+            await DepersistSettings();
 
             var mainWindow = new MainWindow
             {
                 DataContext = _serviceProvider.GetRequiredService<ShellViewModel>()
             };
-
             mainWindow.Show();
 
-
             base.OnStartup(e);
+        }
+
+        private async Task DepersistSettings()
+        {
+            var settingsService = _serviceProvider.GetRequiredService<AppSettingsService>();
+            await settingsService.LoadAsync();
+            Log.Information("Settings depersisted");
+
+            var themeService = _serviceProvider.GetRequiredService<AppThemeService>();
+            themeService.ApplyTheme(settingsService.Settings.Theme);
         }
 
         /// <summary>
         /// Configures all application services and registers them in the dependency injection container.
         /// This includes logging, navigation, view models, and screen registry.
         /// </summary>
-        /// <param name="services">The service collection to configure.</param>
-        private void ConfigureServices(IServiceCollection services)
+        private void ConfigureServices()
         {
+            var services = new ServiceCollection();
+
 
             // Add logging to our services.
             services.AddLogging(builder =>
@@ -65,19 +69,21 @@ namespace DigitalManualSet.App
                 builder.AddSerilog();
             });
 
+            // App level
+            services.AddSingleton<AppSettingsService>();
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<AppThemeService>();
 
-            services.AddSingleton<ShellViewModel>();
+            services.AddTransient<CreatePackageViewModel>();
+            services.AddTransient<OpenPackageViewModel>();
+            services.AddTransient<SettingsViewModel>();
 
             // Navigation / screen metadata creation
+            services.AddSingleton<ShellViewModel>();
             services.AddSingleton<ScreenRegistry>();
-
             services.AddSingleton<HomeViewModel>();
-            services.AddSingleton<CreatePackageViewModel>();
-            services.AddSingleton<OpenPackageViewModel>();
-            services.AddSingleton<SettingsViewModel>();
 
-
+            _serviceProvider = services.BuildServiceProvider();
         }
 
         /// <summary>
@@ -86,23 +92,15 @@ namespace DigitalManualSet.App
         /// </summary>
         private void InitLogging()
         {
-            var logDirectory = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "DigitalManualSet",
-                "Logs");
-
-            Directory.CreateDirectory(logDirectory);
+            Directory.CreateDirectory(AppPaths.LogsFolder);
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.File(
-                    Path.Combine(logDirectory, $"{AppInfo.ProductName}-.log"),
+                    Path.Combine(AppPaths.LogsFolder, $"{AppInfo.ProductName}-.log"),
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 14)
                 .CreateLogger();
-
-            Log.Information("Application starting");
-
         }
 
         /// <summary>
