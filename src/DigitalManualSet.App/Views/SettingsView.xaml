@@ -20,8 +20,10 @@
     -->
     <UserControl.Resources>
 
-        <!-- ContainerStyle: used to visually group related settings with consistent
-             background, border and corner radius. -->
+        <!--
+            ContainerStyle: used to visually group related settings with consistent
+            background, border and corner radius.
+        -->
         <Style x:Key="ContainerStyle" TargetType="{x:Type Border}">
 
             <Setter Property="Background" Value="{DynamicResource LayerFillColorAltBrush}" />
@@ -50,7 +52,7 @@
             Text="Settings View" />
 
 
-        <!-- Appearance section: controls related to visual theme selection. -->
+        <!--  Appearance section: controls related to visual theme selection.  -->
         <TextBlock
             Grid.Row="1"
             Margin="8,0,0,10"
@@ -91,7 +93,7 @@
                 <!-- The ComboBox is bound to ThemeColors (ComboBoxItemViewModel<AppTheme>)
                      and SelectedItem is bound to SelectedTheme on the view model. DisplayMemberPath
                      shows the human friendly DisplayText while SelectedValuePath exposes the
-                     underlying AppTheme value. -->
+                     underlying AppTheme value.-->
                 <ComboBox
                     Grid.Column="2"
                     Width="200"
@@ -106,7 +108,7 @@
         </Border>
 
 
-        <!-- Application Settings: non-appearance app preferences such as working folder. -->
+        <!--  Application Settings: non-appearance app preferences such as working folder.  -->
         <TextBlock
             Grid.Row="3"
             Margin="8,24,0,10"
@@ -147,7 +149,7 @@
 
                 </StackPanel>
 
-                <!-- Shows the currently configured working folder path from Settings.WorkingFolderPath. -->
+                <!--  Shows the currently configured working folder path from Settings.WorkingFolderPath.  -->
                 <TextBlock
                     Grid.Column="2"
                     VerticalAlignment="Center"
@@ -155,8 +157,10 @@
                     Style="{StaticResource BodyTextBlockStyle}"
                     Text="{Binding WorkingFolderPath}" />
 
-                <!-- Open button invokes OpenWorkingFolderCommand which ensures the folder exists
-                     and opens it in the system file explorer. -->
+                <!--
+                    Open button invokes OpenWorkingFolderCommand which ensures the folder exists
+                    and opens it in the system file explorer.
+                -->
                 <Button
                     Grid.Column="3"
                     Command="{Binding OpenWorkingFolderCommand}"

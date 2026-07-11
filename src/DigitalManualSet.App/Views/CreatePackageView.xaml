@@ -2,19 +2,98 @@
     x:Class="DigitalManualSet.App.Views.CreatePackageView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:createPackage="clr-namespace:DigitalManualSet.App.ViewModels.CreatePackage"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DigitalManualSet.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="clr-namespace:DigitalManualSet.App.ViewModels"
+    d:DataContext="{d:DesignInstance createPackage:CreatePackageViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
 
-        <TextBlock
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontSize="32"
-            Text="Create package view" />
+    <!--
+        CreatePackageView.xaml
+        Purpose: Hosts the multi-step "Create Package" workflow UI. The DataContext
+        is a CreatePackageViewModel which exposes the current step view-model via
+        CurrentStepViewModel, navigation commands (NextCommand/BackCommand), and
+        progress metadata (CurrentStepTitle, StepInfo, ProgressPercentage).
+    -->
+    <Grid Margin="12">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+
+
+        <!--  Header: shows current step title, step info and a progress bar.  -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--  CurrentStepTitle: bound to the active workflow step's Title.  -->
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="{Binding CurrentStepTitle}" />
+
+            <!--  StepInfo: small helper text showing index/total (e.g. "Step 2 of 4").  -->
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="{Binding StepInfo}" />
+
+            <!--  ProgressBar: visual representation of workflow progress bound to ProgressPercentage.  -->
+            <ProgressBar
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Height="4"
+                Margin="0,12,0,0"
+                Maximum="100"
+                Minimum="0"
+                Value="{Binding ProgressPercentage, Mode=OneWay}" />
+
+
+        </Grid>
+
+        <!--
+            The ContentControl hosts the concrete step view by binding to CurrentStepViewModel.
+            Template/DataTemplate selection is handled by WPF based on the view-model type.
+        -->
+        <ContentControl Grid.Row="1" Content="{Binding CurrentStepViewModel}" />
+
+        <!--  Footer: navigation buttons for the workflow.  -->
+        <DockPanel Grid.Row="2" LastChildFill="False">
+            <!--  Back button: bound to BackCommand and disabled when CanMoveBack is false.  -->
+            <Button
+                Width="125"
+                Margin="0,0,8,0"
+                Command="{Binding BackCommand}"
+                Content="Back"
+                DockPanel.Dock="Left" />
+
+            <!--  Next button: bound to NextCommand and disabled when CanMoveNext is false.  -->
+            <Button
+                Width="125"
+                Command="{Binding NextCommand}"
+                Content="Next"
+                DockPanel.Dock="Right" />
+        </DockPanel>
 
     </Grid>
 </UserControl>

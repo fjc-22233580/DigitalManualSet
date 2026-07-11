@@ -1,5 +1,6 @@
 ﻿using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Navigation;
+using DigitalManualSet.App.ViewModels.CreatePackage;
 
 namespace DigitalManualSet.App.ViewModels;
 

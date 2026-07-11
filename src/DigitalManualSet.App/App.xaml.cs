@@ -9,6 +9,7 @@ using System.IO;
 using System.Windows;
 using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Services;
+using DigitalManualSet.App.ViewModels.CreatePackage;
 
 namespace DigitalManualSet.App
 {
@@ -73,8 +74,15 @@ namespace DigitalManualSet.App
             services.AddSingleton<AppSettingsService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<AppThemeService>();
+            services.AddSingleton<IPackageWorkflowStepViewModelResolver, PackageWorkflowStepViewModelResolver>();
 
             services.AddTransient<CreatePackageViewModel>();
+            services.AddTransient<CreateOrderViewModel>();
+            services.AddTransient<ProcessDocumentsViewModel>();
+            services.AddTransient<SelectOutputViewModel>();
+            services.AddTransient<CompletePackageViewModel>();
+
+
             services.AddTransient<OpenPackageViewModel>();
             services.AddTransient<SettingsViewModel>();
 
