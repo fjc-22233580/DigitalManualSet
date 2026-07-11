@@ -1,14 +1,19 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:createPackageVM="clr-namespace:DigitalManualSet.App.ViewModels.CreatePackage"
+    xmlns:createPackageViews="clr-namespace:DigitalManualSet.App.Views.CreatePackage"
     xmlns:viewModels="clr-namespace:DigitalManualSet.App.ViewModels"
     xmlns:views="clr-namespace:DigitalManualSet.App.Views">
+
+
+    <!--  Home Screen Views  -->
 
     <DataTemplate DataType="{x:Type viewModels:HomeViewModel}">
         <views:HomeView />
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type viewModels:CreatePackageViewModel}">
+    <DataTemplate DataType="{x:Type createPackageVM:CreatePackageViewModel}">
         <views:CreatePackageView />
     </DataTemplate>
 
@@ -19,5 +24,24 @@
     <DataTemplate DataType="{x:Type viewModels:SettingsViewModel}">
         <views:SettingsView />
     </DataTemplate>
+
+    <!--  Workflow Views  -->
+
+    <DataTemplate DataType="{x:Type createPackageVM:CreateOrderViewModel}">
+        <createPackageViews:CreateOrderView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type createPackageVM:ProcessDocumentsViewModel}">
+        <createPackageViews:ProcessDocumentsView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type createPackageVM:SelectOutputViewModel}">
+        <createPackageViews:SelectOutputView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type createPackageVM:CompletePackageViewModel}">
+        <createPackageViews:CompletePackageView />
+    </DataTemplate>
+
 
 </ResourceDictionary>
