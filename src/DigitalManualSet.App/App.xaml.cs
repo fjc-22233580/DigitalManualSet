@@ -10,6 +10,8 @@ using System.Windows;
 using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Services;
 using DigitalManualSet.App.ViewModels.CreatePackage;
+using DigitalManualSet.Core.Orders;
+using DigitalManualSet.Infrastructure.Orders;
 
 namespace DigitalManualSet.App
 {
@@ -75,6 +77,18 @@ namespace DigitalManualSet.App
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<AppThemeService>();
             services.AddSingleton<IPackageWorkflowStepViewModelResolver, PackageWorkflowStepViewModelResolver>();
+
+
+            services.AddSingleton<IOpenOrderProvider>(
+                serviceProvider =>
+                {
+                    var filePath = Path.Combine(
+                        AppContext.BaseDirectory,
+                        "TestData",
+                        "ValidOpenOrders.csv");
+
+                    return new CsvOpenOrderProvider(filePath);
+                });
 
             services.AddTransient<CreatePackageViewModel>();
             services.AddTransient<CreateOrderViewModel>();

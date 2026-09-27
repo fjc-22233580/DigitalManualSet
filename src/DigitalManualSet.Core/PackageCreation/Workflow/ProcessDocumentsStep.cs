@@ -10,8 +10,9 @@ public sealed class ProcessDocumentsStep : WorkflowStep<PackageWorkflowStepId>
     /// <summary>
     /// Initializes a new instance of the <see cref="ProcessDocumentsStep"/> class.
     /// </summary>
-    public ProcessDocumentsStep()
-        : base(PackageWorkflowStepId.ProcessDocuments, "Process Documents")
+    /// <param name="package"></param>
+    public ProcessDocumentsStep(Package package)
+        : base(PackageWorkflowStepId.ProcessDocuments, "Process Documents", package)
     {
 
     }

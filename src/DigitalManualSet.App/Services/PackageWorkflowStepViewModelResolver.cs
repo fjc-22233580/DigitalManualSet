@@ -1,6 +1,7 @@
 ﻿using DigitalManualSet.App.ViewModels.CreatePackage;
 using DigitalManualSet.App.ViewModels.CreatePackage.Interfaces;
 using DigitalManualSet.Core.PackageCreation.Workflow;
+using DigitalManualSet.Core.Workflow;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DigitalManualSet.App.Services;
@@ -23,20 +24,15 @@ public class PackageWorkflowStepViewModelResolver : IPackageWorkflowStepViewMode
         _serviceProvider = serviceProvider;
     }
 
-    /// <summary>
-    /// Resolves the <see cref="IPackageWorkflowStepViewModel"/> implementation for the specified step id.
-    /// </summary>
-    /// <param name="stepId">The workflow step identifier to resolve.</param>
-    /// <returns>An instance implementing <see cref="IPackageWorkflowStepViewModel"/> for the step.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when an unsupported <paramref name="stepId"/> is provided.</exception>
-    public IPackageWorkflowStepViewModel Resolve(PackageWorkflowStepId stepId)
+   
+    public IPackageWorkflowStepViewModel Resolve(IWorkflowStep<PackageWorkflowStepId> stepId)
     {
         IPackageWorkflowStepViewModel vm;
 
-        switch (stepId)
+        switch (stepId.Id)
         {
             case PackageWorkflowStepId.CreateOrder:
-                vm = _serviceProvider.GetRequiredService<CreateOrderViewModel>();
+                vm = ActivatorUtilities.CreateInstance<CreateOrderViewModel>(_serviceProvider, (CreateOrderStep)stepId);
                 break;
             case PackageWorkflowStepId.ProcessDocuments:
                 vm = _serviceProvider.GetRequiredService<ProcessDocumentsViewModel>();
@@ -50,7 +46,7 @@ public class PackageWorkflowStepViewModelResolver : IPackageWorkflowStepViewMode
             default:
                 throw new ArgumentOutOfRangeException(nameof(stepId), stepId, null);
         }
-
+        
         return vm;
     }
 }

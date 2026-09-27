@@ -1,6 +1,7 @@
 ﻿using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Services;
 using DigitalManualSet.App.ViewModels.CreatePackage.Interfaces;
+using DigitalManualSet.Core.Orders;
 using DigitalManualSet.Core.PackageCreation;
 using DigitalManualSet.Core.PackageCreation.Workflow;
 using DigitalManualSet.Core.Workflow;
@@ -28,16 +29,30 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
     #region Ctor
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CreatePackageViewModel"/> class.
+    /// Initializes a new instance of the <see cref="CreatePackageViewModel" /> class.
     /// </summary>
     /// <param name="stepViewModelResolver">Resolver used to obtain the concrete view-model for the current workflow step.</param>
-    public CreatePackageViewModel(IPackageWorkflowStepViewModelResolver stepViewModelResolver)
+    /// <param name="openOrderProvider">The open order provider.</param>
+    public CreatePackageViewModel(IPackageWorkflowStepViewModelResolver stepViewModelResolver, IOpenOrderProvider openOrderProvider)
     {
         _stepViewModelResolver = stepViewModelResolver;
-        _workflow = PackageWorkflowFactory.Create();
+        _workflow = PackageWorkflowFactory.Create(openOrderProvider);
 
         NextCommand = new RelayCommand(async () => await MoveNextAsync(), () => CanMoveNext);
         BackCommand = new RelayCommand(async () => await MoveBackAsync(), () => CanMoveBack);
+
+        // Fire-and-forget first step.
+        _ = InitializeCurrentStepAsync();
+
+        _currentStepViewModel = _stepViewModelResolver.Resolve(_workflow.CurrentStep);
+
+        _workflow.CurrentStep.NavigationStateChanged += OnNavigationStateChanged;
+    }
+
+    private void OnNavigationStateChanged(object? sender, EventArgs e)
+    {
+        NextCommand.RaiseCanExecuteChanged();
+        BackCommand.RaiseCanExecuteChanged();
     }
 
     #endregion
@@ -92,7 +107,17 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
     /// Gets the view-model interface for the currently active workflow step. The
     /// resolver is used to obtain the concrete implementation for the UI.
     /// </summary>
-    public IPackageWorkflowStepViewModel CurrentStepViewModel => _stepViewModelResolver.Resolve(_workflow.CurrentStep.Id);
+    private IPackageWorkflowStepViewModel _currentStepViewModel;
+
+    public IPackageWorkflowStepViewModel CurrentStepViewModel
+    {
+        get => _currentStepViewModel;
+        private set
+        {
+            _currentStepViewModel = value;
+            OnPropertyChanged();
+        }
+    }
 
     /// <summary>
     /// Gets the overall progress through the workflow as a percentage (0-100).
@@ -115,12 +140,32 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
 
     #region Methods
 
+    private async Task InitializeCurrentStepAsync()
+    {
+        try
+        {
+            await _workflow.CurrentStep.OnEnterAsync();
+            RefreshWorkflowProperties();
+        }
+        catch (Exception ex)
+        {
+            // Log or handle initialization errors so exceptions don't get silently swallowed.
+            // e.g. Log.Error(ex, "Failed to initialize workflow step.");
+        }
+    }
+
     /// <summary>
     /// Moves the workflow to the next step and refreshes UI-bound properties.
     /// </summary>
     private async Task MoveNextAsync()
     {
+        var previousStep = _workflow.CurrentStep;
+        previousStep.NavigationStateChanged -= OnNavigationStateChanged;
+
         await _workflow.MoveNextAsync();
+
+        _workflow.CurrentStep.NavigationStateChanged += OnNavigationStateChanged;
+
         RefreshWorkflowProperties();
     }
 
@@ -129,7 +174,13 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
     /// </summary>
     private async Task MoveBackAsync()
     {
+
+        var previousStep = _workflow.CurrentStep;
+        previousStep.NavigationStateChanged -= OnNavigationStateChanged;
+
         await _workflow.MoveBackAsync();
+
+        _workflow.CurrentStep.NavigationStateChanged += OnNavigationStateChanged;
         RefreshWorkflowProperties();
     }
 
@@ -139,6 +190,8 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
     /// </summary>
     private void RefreshWorkflowProperties()
     {
+        CurrentStepViewModel = _stepViewModelResolver.Resolve(_workflow.CurrentStep);
+
         OnPropertyChanged(nameof(CurrentStepViewModel));
         OnPropertyChanged(nameof(CurrentStepTitle));
         OnPropertyChanged(nameof(CurrentStepId));

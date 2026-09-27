@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DigitalManualSet.Core\DigitalManualSet.Core.csproj" />
+    <ProjectReference Include="..\DigitalManualSet.Infrastructure\DigitalManualSet.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
