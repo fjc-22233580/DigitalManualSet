@@ -12,7 +12,13 @@
     mc:Ignorable="d">
     <Grid>
 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
         <TextBlock Text="{Binding Title}" />
+
 
     </Grid>
 </UserControl>

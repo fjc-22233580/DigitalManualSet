@@ -1,4 +1,5 @@
-﻿using DigitalManualSet.Core.PackageCreation.Workflow;
+﻿using DigitalManualSet.Core.Orders;
+using DigitalManualSet.Core.PackageCreation.Workflow;
 using DigitalManualSet.Core.Workflow;
 
 namespace DigitalManualSet.Core.PackageCreation;
@@ -14,13 +15,15 @@ public static class PackageWorkflowFactory
     /// <returns>
     /// A configured package creation workflow.
     /// </returns>
-    public static Workflow<PackageWorkflowStepId> Create()
+    public static Workflow<PackageWorkflowStepId> Create(IOpenOrderProvider openOrderProvider)
     {
+        var package = new Package();
+
         return new Workflow<PackageWorkflowStepId>(
         [
-            new CreateOrderStep(),
-            new ProcessDocumentsStep(),
-            new SelectOutputStep(),
+            new CreateOrderStep(package, openOrderProvider),
+            new ProcessDocumentsStep(package),
+            new SelectOutputStep(package),
         ]);
     }
 }

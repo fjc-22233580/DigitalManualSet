@@ -10,8 +10,9 @@ public sealed class SelectOutputStep : WorkflowStep<PackageWorkflowStepId>
     /// <summary>
     /// Initialises a new instance of the <see cref="SelectOutputStep"/> class.
     /// </summary>
-    public SelectOutputStep()
-        : base(PackageWorkflowStepId.SelectOutput, "Select Output")
+    /// <param name="package"></param>
+    public SelectOutputStep(Package package)
+        : base(PackageWorkflowStepId.SelectOutput, "Select Output", package)
     {
 
     }

@@ -1,4 +1,6 @@
-﻿namespace DigitalManualSet.Core.Workflow;
+﻿using DigitalManualSet.Core.PackageCreation;
+
+namespace DigitalManualSet.Core.Workflow;
 
 
 /// <summary>
@@ -21,7 +23,7 @@ public abstract class WorkflowStep<TStepId> : IWorkflowStep<TStepId> where TStep
     /// Thrown when <paramref name="id"/> or <paramref name="title"/> is null,
     /// empty, or whitespace.
     /// </exception>
-    protected WorkflowStep(TStepId id, string title)
+    protected WorkflowStep(TStepId id, string title, Package package)
     {
         ArgumentNullException.ThrowIfNull(id);
 
@@ -32,6 +34,7 @@ public abstract class WorkflowStep<TStepId> : IWorkflowStep<TStepId> where TStep
 
         Id = id;
         Title = title;
+        Package = package;
     }
 
     /// <inheritdoc />
@@ -40,11 +43,24 @@ public abstract class WorkflowStep<TStepId> : IWorkflowStep<TStepId> where TStep
     /// <inheritdoc />
     public string Title { get; }
 
+    protected Package Package { get; }
+
     /// <inheritdoc />
     public virtual bool CanMoveNext => true;
 
     /// <inheritdoc />
     public virtual bool CanMoveBack => true;
+    
+    /// <inheritdoc />
+    public event EventHandler? NavigationStateChanged;
+
+    /// <summary>
+    /// Called when [navigation state changed].
+    /// </summary>
+    protected void OnNavigationStateChanged()
+    {
+        NavigationStateChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     /// <inheritdoc />
     public virtual Task OnEnterAsync()

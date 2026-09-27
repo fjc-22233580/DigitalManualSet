@@ -1,6 +1,7 @@
 ﻿using DigitalManualSet.App.Common;
 using DigitalManualSet.App.ViewModels.CreatePackage.Interfaces;
 using DigitalManualSet.Core.PackageCreation.Workflow;
+using DigitalManualSet.Core.Workflow;
 
 namespace DigitalManualSet.App.Services;
 
@@ -15,5 +16,5 @@ public interface IPackageWorkflowStepViewModelResolver
     /// </summary>
     /// <param name="stepId">The identifier of the package workflow step to resolve.</param>
     /// <returns>The <see cref="IPackageWorkflowStepViewModel"/> that corresponds to the given step id.</returns>
-    IPackageWorkflowStepViewModel Resolve(PackageWorkflowStepId stepId);
+    IPackageWorkflowStepViewModel Resolve(IWorkflowStep<PackageWorkflowStepId> stepId);
 }

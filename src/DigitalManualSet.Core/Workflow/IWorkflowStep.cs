@@ -51,6 +51,11 @@ public interface IWorkflowStep<TStepId> where TStepId : notnull
     bool CanMoveBack { get; }
 
     /// <summary>
+    /// Occurs when [navigation state changed].
+    /// </summary>
+    event EventHandler? NavigationStateChanged;
+
+    /// <summary>
     /// Performs any logic required when the workflow enters this step.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>

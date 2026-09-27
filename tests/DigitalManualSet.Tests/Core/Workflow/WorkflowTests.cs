@@ -161,7 +161,141 @@ public class WorkflowTests
         Assert.False(stepTwo.Exited);
     }
 
+    /// <summary>
+    /// Verifies that the constructor throws when steps collection is null.
+    /// </summary>
+    [Fact]
+    public void Constructor_WhenStepsIsNull_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new Workflow<DummyWorkflowStepId>(null!));
+    }
 
+    /// <summary>
+    /// Verifies that a single-step workflow functions correctly.
+    /// </summary>
+    [Fact]
+    public void Constructor_WhenSingleStep_WorksCorrectly()
+    {
+        // Arrange
+        var steps = new[] { new DummyWorkflowStep(DummyWorkflowStepId.StepOne, "Step One") };
+
+        // Act
+        var workflow = new Workflow<DummyWorkflowStepId>(steps);
+
+        // Assert
+        Assert.Equal(DummyWorkflowStepId.StepOne, workflow.CurrentStep.Id);
+        Assert.Equal(0, workflow.CurrentIndex);
+        Assert.True(workflow.IsFirstStep);
+        Assert.True(workflow.IsLastStep);
+    }
+
+    /// <summary>
+    /// Verifies that moving next from the last step does not advance.
+    /// </summary>
+    [Fact]
+    public async Task MoveNextAsync_WhenLastStep_CannotMoveNext()
+    {
+        // Arrange
+        var steps = CreateSteps();
+        var workflow = new Workflow<DummyWorkflowStepId>(steps);
+
+        // Move to last step
+        await workflow.MoveNextAsync();
+        await workflow.MoveNextAsync();
+
+        // Act
+        await workflow.MoveNextAsync();
+
+        // Assert
+        Assert.Equal(DummyWorkflowStepId.StepThree, workflow.CurrentStep.Id);
+        Assert.Equal(2, workflow.CurrentIndex);
+        Assert.True(workflow.IsLastStep);
+    }
+
+    /// <summary>
+    /// Verifies that moving back from the first step does not move.
+    /// </summary>
+    [Fact]
+    public async Task MoveBackAsync_WhenFirstStep_CannotMoveBack()
+    {
+        // Arrange
+        var steps = CreateSteps();
+        var workflow = new Workflow<DummyWorkflowStepId>(steps);
+
+        // Act
+        await workflow.MoveBackAsync();
+
+        // Assert
+        Assert.Equal(DummyWorkflowStepId.StepOne, workflow.CurrentStep.Id);
+        Assert.Equal(0, workflow.CurrentIndex);
+        Assert.True(workflow.IsFirstStep);
+    }
+
+    /// <summary>
+    /// Verifies the workflow does not move back when the current step disallows it.
+    /// </summary>
+    [Fact]
+    public async Task MoveBackAsync_WhenCurrentStepCannotMoveBack_DoesNotMove()
+    {
+        // Arrange
+        var stepOne = new DummyWorkflowStep(DummyWorkflowStepId.StepOne, "Step One");
+        var stepTwo = new DummyWorkflowStep(
+            DummyWorkflowStepId.StepTwo,
+            "Step Two",
+            canMoveBack: false);
+
+        var workflow = new Workflow<DummyWorkflowStepId>([stepOne, stepTwo]);
+
+        await workflow.MoveNextAsync();
+
+        // Act
+        await workflow.MoveBackAsync();
+
+        // Assert
+        Assert.Equal(DummyWorkflowStepId.StepTwo, workflow.CurrentStep.Id);
+        Assert.Equal(1, workflow.CurrentIndex);
+    }
+
+    /// <summary>
+    /// Verifies that when moving back the previous step's OnEnterAsync is invoked.
+    /// </summary>
+    [Fact]
+    public async Task MoveBackAsync_WhenAllowed_CallsOnEnterAsyncOnPreviousStep()
+    {
+        // Arrange
+        var stepOne = new DummyWorkflowStep(DummyWorkflowStepId.StepOne, "Step One");
+        var stepTwo = new DummyWorkflowStep(DummyWorkflowStepId.StepTwo, "Step Two");
+
+        var workflow = new Workflow<DummyWorkflowStepId>([stepOne, stepTwo]);
+
+        // Act
+        await workflow.MoveNextAsync();
+        await workflow.MoveBackAsync();
+
+        // Assert - stepOne should have been entered at least once
+        Assert.True(stepOne.Entered);
+    }
+
+    /// <summary>
+    /// Verifies that when moving back the current step's OnExitAsync is invoked.
+    /// </summary>
+    [Fact]
+    public async Task MoveBackAsync_WhenAllowed_CallsOnExitAsyncOnCurrentStep()
+    {
+        // Arrange
+        var stepOne = new DummyWorkflowStep(DummyWorkflowStepId.StepOne, "Step One");
+        var stepTwo = new DummyWorkflowStep(DummyWorkflowStepId.StepTwo, "Step Two");
+
+        var workflow = new Workflow<DummyWorkflowStepId>([stepOne, stepTwo]);
+
+        // Act
+        await workflow.MoveNextAsync();
+        await workflow.MoveBackAsync();
+
+        // Assert - stepTwo should have been exited
+        Assert.True(stepTwo.Exited);
+    }
 
     /// <summary>
     /// Helper that constructs a list of three dummy steps used by multiple tests.

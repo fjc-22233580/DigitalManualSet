@@ -7,7 +7,15 @@
 		<Description>Proof-of-concept digital documentation delivery system developed for Final Year Project.</Description>
 	</PropertyGroup>
 
+
 	<PropertyGroup>
 		<BaseOutputPath>$(MSBuildThisFileDirectory)output\build\$(MSBuildProjectName)\</BaseOutputPath>
 	</PropertyGroup>
+
+	<ItemGroup Condition="'$(MSBuildProjectName)' == 'DigitalManualSet.App'">
+		<None Include="$(MSBuildThisFileDirectory)tests\DigitalManualSet.Tests\TestData\**\*.*">
+			<Link>TestData\%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>

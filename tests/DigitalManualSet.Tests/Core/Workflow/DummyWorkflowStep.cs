@@ -1,4 +1,5 @@
-﻿using DigitalManualSet.Core.Workflow;
+﻿using DigitalManualSet.Core.PackageCreation;
+using DigitalManualSet.Core.Workflow;
 
 namespace DigitalManualSet.Tests.Core.Workflow;
 
@@ -19,7 +20,7 @@ public class DummyWorkflowStep : WorkflowStep<DummyWorkflowStepId>
     public DummyWorkflowStep(DummyWorkflowStepId id, 
         string title, 
         bool canMoveNext = true,
-        bool canMoveBack = true) : base(id, title)
+        bool canMoveBack = true) : base(id, title, new Package())
     {
         CanMoveNextValue = canMoveNext;
         CanMoveBackValue = canMoveBack;
