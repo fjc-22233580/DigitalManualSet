@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DigitalManualSet.App.Common;
+using DigitalManualSet.Core.Common;
 using Microsoft.Extensions.Logging;
 
 namespace DigitalManualSet.App.Settings;
@@ -18,6 +19,11 @@ public sealed class AppSettingsService
     /// </summary>
     private readonly ILogger<AppSettingsService> _logger;
 
+    /// <summary>
+    /// Holds a reference to the app path provider.
+    /// </summary>
+    private readonly IAppPathProvider _appPathProvider;
+
 
     // Shared JSON options used when reading and writing the settings file.
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -31,15 +37,17 @@ public sealed class AppSettingsService
     };
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AppSettingsService"/> class.
+    /// Initializes a new instance of the <see cref="AppSettingsService" /> class.
     /// </summary>
     /// <param name="logger">Logger used to record warnings and information during load/save operations.</param>
-    public AppSettingsService(ILogger<AppSettingsService> logger)
+    /// <param name="appPathProvider">The application path provider.</param>
+    public AppSettingsService(ILogger<AppSettingsService> logger, IAppPathProvider appPathProvider)
     {
         _logger = logger;
+        _appPathProvider = appPathProvider;
 
         // Start with defaults so Settings is always safe to use.
-        Settings = CreateDefaults();
+        Settings = CreateDefaults(_appPathProvider.DocumentsFolder);
     }
 
     /// <summary>
@@ -59,26 +67,26 @@ public sealed class AppSettingsService
         try
         {
             // Ensure the folder exists before trying to read or write settings.
-            Directory.CreateDirectory(AppPaths.LocalAppDataFolder);
+            Directory.CreateDirectory(_appPathProvider.LocalAppDataFolder);
 
             // First run: create a settings file using default values.
-            if (!File.Exists(AppPaths.SettingsFilePath))
+            if (!File.Exists(_appPathProvider.SettingsFilePath))
             {
                 await SaveAsync();
                 return;
             }
 
-            var json = await File.ReadAllTextAsync(AppPaths.SettingsFilePath);
+            var json = await File.ReadAllTextAsync(_appPathProvider.SettingsFilePath);
 
             // If deserialisation fails or returns null, fall back to defaults.
-            Settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? CreateDefaults();
+            Settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? CreateDefaults(_appPathProvider.DocumentsFolder);
 
         }
         catch (Exception ex)
         {
             // Do not stop the app from starting just because settings failed to load.
             _logger.LogWarning(ex, "Failed to load app settings. Default settings will be used.");
-            Settings = CreateDefaults();
+            Settings = CreateDefaults(_appPathProvider.DocumentsFolder);
         }
     }
 
@@ -91,10 +99,10 @@ public sealed class AppSettingsService
         try
         {
             // Ensure the folder exists before writing the settings file.
-            Directory.CreateDirectory(AppPaths.LocalAppDataFolder);
+            Directory.CreateDirectory(_appPathProvider.LocalAppDataFolder);
 
             var json = JsonSerializer.Serialize(Settings, JsonOptions);
-            await File.WriteAllTextAsync(AppPaths.SettingsFilePath, json);
+            await File.WriteAllTextAsync(_appPathProvider.SettingsFilePath, json);
             _logger.LogInformation("Persistence file updated.");
         }
         catch (Exception ex)
@@ -107,12 +115,12 @@ public sealed class AppSettingsService
     /// <summary>
     /// Creates a new <see cref="AppSettings"/> instance populated with defaults.
     /// </summary>
-    private static AppSettings CreateDefaults()
+    private static AppSettings CreateDefaults(string userDocumentsFolder)
     {
         return new AppSettings
         {
             // Default to a user-accessible folder.
-            WorkingFolderPath = AppPaths.DocumentsFolder,
+            WorkingFolderPath = userDocumentsFolder,
             Theme = AppTheme.System,
             LastOpenedPackagePath = string.Empty
         };
