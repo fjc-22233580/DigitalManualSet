@@ -1,17 +1,20 @@
 ﻿using App;
+using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Navigation;
+using DigitalManualSet.App.Services;
 using DigitalManualSet.App.Settings;
 using DigitalManualSet.App.ViewModels;
+using DigitalManualSet.App.ViewModels.CreatePackage;
+using DigitalManualSet.Core.Common;
+using DigitalManualSet.Core.Documents;
+using DigitalManualSet.Core.Orders;
+using DigitalManualSet.Infrastructure.Documents;
+using DigitalManualSet.Infrastructure.Orders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System.IO;
 using System.Windows;
-using DigitalManualSet.App.Common;
-using DigitalManualSet.App.Services;
-using DigitalManualSet.App.ViewModels.CreatePackage;
-using DigitalManualSet.Core.Orders;
-using DigitalManualSet.Infrastructure.Orders;
 
 namespace DigitalManualSet.App
 {
@@ -26,13 +29,27 @@ namespace DigitalManualSet.App
         private ServiceProvider _serviceProvider;
 
         /// <summary>
+        /// The application path provider
+        /// </summary>
+        private AppPathProvider _appPathProvider;
+
+        /// <summary>
         /// Raises the <see cref="E:System.Windows.Application.Startup" /> event.
         /// </summary>
         /// <param name="e">A <see cref="T:System.Windows.StartupEventArgs" /> that contains the event data.</param>
         protected override async void OnStartup(StartupEventArgs e)
         {
+            _appPathProvider = new AppPathProvider();
+
             InitLogging();
+
             Log.Information("Application started");
+
+            // Log PC Info
+            var pcInfo =
+                $"Machine: {Environment.MachineName}, " +
+                $"User: {Environment.UserName}";
+            Log.Information(pcInfo);
 
             ConfigureServices();
             await DepersistSettings();
@@ -46,6 +63,9 @@ namespace DigitalManualSet.App
             base.OnStartup(e);
         }
 
+        /// <summary>
+        /// Depersists the settings file
+        /// </summary>
         private async Task DepersistSettings()
         {
             var settingsService = _serviceProvider.GetRequiredService<AppSettingsService>();
@@ -64,7 +84,6 @@ namespace DigitalManualSet.App
         {
             var services = new ServiceCollection();
 
-
             // Add logging to our services.
             services.AddLogging(builder =>
             {
@@ -73,6 +92,7 @@ namespace DigitalManualSet.App
             });
 
             // App level
+            services.AddSingleton<IAppPathProvider>(_appPathProvider);
             services.AddSingleton<AppSettingsService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<AppThemeService>();
@@ -89,6 +109,21 @@ namespace DigitalManualSet.App
 
                     return new CsvOpenOrderProvider(filePath);
                 });
+
+            services.AddSingleton<IDocumentProvider>(
+                serviceProvider =>
+                {
+                    var filePath = Path.Combine(
+                        AppContext.BaseDirectory,
+                        "TestData",
+                        "TestDocuments.csv");
+
+                    return new CsvDocumentProvider(filePath);
+                });
+
+            services.AddSingleton<IDocumentDownloadService>(_ => new LocalDocumentDownloadService(_appPathProvider.TestDocuments));
+
+            services.AddSingleton<IDocumentValidationService, DocumentValidationService>();
 
             services.AddTransient<CreatePackageViewModel>();
             services.AddTransient<CreateOrderViewModel>();
@@ -114,12 +149,10 @@ namespace DigitalManualSet.App
         /// </summary>
         private void InitLogging()
         {
-            Directory.CreateDirectory(AppPaths.LogsFolder);
-
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.File(
-                    Path.Combine(AppPaths.LogsFolder, $"{AppInfo.ProductName}-.log"),
+                    Path.Combine(_appPathProvider.LogsFolder, $"{AppInfo.ProductName}-.log"),
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 14)
                 .CreateLogger();

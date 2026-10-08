@@ -18,6 +18,19 @@
             <converters:BooleanToVisibilityConverter x:Key="BoolToVisibility" />
             <converters:StringToVisibilityConverter x:Key="StringToVisibility" />
 
+            <!--
+                ContainerStyle: used to visually group related settings with consistent
+                background, border and corner radius.
+            -->
+            <Style x:Key="ContainerStyle" TargetType="{x:Type Border}">
+
+                <Setter Property="Background" Value="{DynamicResource LayerFillColorAltBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ExpanderHeaderBorderBrush}" />
+                <Setter Property="BorderThickness" Value="{StaticResource ExpanderBorderThemeThickness}" />
+                <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>
