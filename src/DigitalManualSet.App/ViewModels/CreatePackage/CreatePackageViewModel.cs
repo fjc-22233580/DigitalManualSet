@@ -1,10 +1,12 @@
 ﻿using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Services;
 using DigitalManualSet.App.ViewModels.CreatePackage.Interfaces;
+using DigitalManualSet.Core.Documents;
 using DigitalManualSet.Core.Orders;
 using DigitalManualSet.Core.PackageCreation;
 using DigitalManualSet.Core.PackageCreation.Workflow;
 using DigitalManualSet.Core.Workflow;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalManualSet.App.ViewModels.CreatePackage;
 
@@ -21,7 +23,19 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
 {
     #region Fields
 
+    /// <summary>
+    /// The logger
+    /// </summary>
+    private readonly ILogger<CreatePackageViewModel> _logger;
+
+    /// <summary>
+    /// The step view model resolver
+    /// </summary>
     private readonly IPackageWorkflowStepViewModelResolver _stepViewModelResolver;
+
+    /// <summary>
+    /// The workflow
+    /// </summary>
     private readonly Workflow<PackageWorkflowStepId> _workflow;
 
     #endregion
@@ -31,12 +45,15 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
     /// <summary>
     /// Initializes a new instance of the <see cref="CreatePackageViewModel" /> class.
     /// </summary>
+    /// <param name="logger">The logger.</param>
     /// <param name="stepViewModelResolver">Resolver used to obtain the concrete view-model for the current workflow step.</param>
     /// <param name="openOrderProvider">The open order provider.</param>
-    public CreatePackageViewModel(IPackageWorkflowStepViewModelResolver stepViewModelResolver, IOpenOrderProvider openOrderProvider)
+    /// <param name="documentProvider">The document provider.</param>
+    public CreatePackageViewModel(ILogger<CreatePackageViewModel> logger, IPackageWorkflowStepViewModelResolver stepViewModelResolver, IOpenOrderProvider openOrderProvider, IDocumentProvider documentProvider)
     {
+        _logger = logger;
         _stepViewModelResolver = stepViewModelResolver;
-        _workflow = PackageWorkflowFactory.Create(openOrderProvider);
+        _workflow = PackageWorkflowFactory.Create(openOrderProvider, documentProvider);
 
         NextCommand = new RelayCommand(async () => await MoveNextAsync(), () => CanMoveNext);
         BackCommand = new RelayCommand(async () => await MoveBackAsync(), () => CanMoveBack);
@@ -47,12 +64,6 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
         _currentStepViewModel = _stepViewModelResolver.Resolve(_workflow.CurrentStep);
 
         _workflow.CurrentStep.NavigationStateChanged += OnNavigationStateChanged;
-    }
-
-    private void OnNavigationStateChanged(object? sender, EventArgs e)
-    {
-        NextCommand.RaiseCanExecuteChanged();
-        BackCommand.RaiseCanExecuteChanged();
     }
 
     #endregion
@@ -140,6 +151,9 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
 
     #region Methods
 
+    /// <summary>
+    /// Initializes the current step asynchronous.
+    /// </summary>
     private async Task InitializeCurrentStepAsync()
     {
         try
@@ -149,8 +163,7 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
         }
         catch (Exception ex)
         {
-            // Log or handle initialization errors so exceptions don't get silently swallowed.
-            // e.g. Log.Error(ex, "Failed to initialize workflow step.");
+           _logger.LogError(ex, "Failed to initialize workflow step.");
         }
     }
 
@@ -200,6 +213,21 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
         OnPropertyChanged(nameof(CanMoveBack));
         OnPropertyChanged(nameof(ProgressPercentage));
 
+        NextCommand.RaiseCanExecuteChanged();
+        BackCommand.RaiseCanExecuteChanged();
+    }
+
+    #endregion
+
+    #region Event Handlers
+
+    /// <summary>
+    /// Called when [navigation state changed].
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    private void OnNavigationStateChanged(object? sender, EventArgs e)
+    {
         NextCommand.RaiseCanExecuteChanged();
         BackCommand.RaiseCanExecuteChanged();
     }

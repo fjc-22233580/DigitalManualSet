@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:DigitalManualSet.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:DigitalManualSet.App.ViewModels"
     d:DataContext="{d:DesignInstance viewModels:SettingsViewModel}"
@@ -18,23 +17,6 @@
         working folder. DataContext is the SettingsViewModel which exposes ThemeColors,
         SelectedTheme and commands/properties used by the view.
     -->
-    <UserControl.Resources>
-
-        <!--
-            ContainerStyle: used to visually group related settings with consistent
-            background, border and corner radius.
-        -->
-        <Style x:Key="ContainerStyle" TargetType="{x:Type Border}">
-
-            <Setter Property="Background" Value="{DynamicResource LayerFillColorAltBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource ExpanderHeaderBorderBrush}" />
-            <Setter Property="BorderThickness" Value="{StaticResource ExpanderBorderThemeThickness}" />
-            <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
-
-        </Style>
-
-    </UserControl.Resources>
-
     <Grid Margin="32,0,32,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

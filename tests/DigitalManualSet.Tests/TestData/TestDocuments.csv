@@ -1,0 +1,13 @@
+DocumentNumber,DocumentName,Revision,Category
+DOC-1001,System User Manual,A,Manual
+DOC-1002,Installation and Setup Guide,B,Manual
+DOC-1003,Safety Information Guide,C,Safety
+DOC-1004,Routine Maintenance Guide,A,Maintenance
+DOC-1005,Electrical Schematic,D,Drawing
+DOC-1006,Mechanical Assembly Drawing,B,Drawing
+DOC-1007,Calibration Procedure,C,Procedure
+DOC-1008,Preventive Maintenance Schedule,A,Maintenance
+DOC-1009,Software Operation Guide,B,Manual
+DOC-1010,System Specification Sheet,A,Specification
+DOC-1011,Declaration of Conformity,C,Certificate
+DOC-1012,Final Inspection Certificate,A,Certificate

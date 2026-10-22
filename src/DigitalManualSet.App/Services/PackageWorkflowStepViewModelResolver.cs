@@ -24,7 +24,14 @@ public class PackageWorkflowStepViewModelResolver : IPackageWorkflowStepViewMode
         _serviceProvider = serviceProvider;
     }
 
-   
+    /// <summary>
+    /// Resolves the view-model interface for the specified workflow step.
+    /// </summary>
+    /// <param name="stepId">The identifier of the package workflow step to resolve.</param>
+    /// <returns>
+    /// The <see cref="IPackageWorkflowStepViewModel" /> that corresponds to the given step id.
+    /// </returns>
+    /// <exception cref="System.ArgumentOutOfRangeException">stepId - null</exception>
     public IPackageWorkflowStepViewModel Resolve(IWorkflowStep<PackageWorkflowStepId> stepId)
     {
         IPackageWorkflowStepViewModel vm;
@@ -35,7 +42,7 @@ public class PackageWorkflowStepViewModelResolver : IPackageWorkflowStepViewMode
                 vm = ActivatorUtilities.CreateInstance<CreateOrderViewModel>(_serviceProvider, (CreateOrderStep)stepId);
                 break;
             case PackageWorkflowStepId.ProcessDocuments:
-                vm = _serviceProvider.GetRequiredService<ProcessDocumentsViewModel>();
+                vm = ActivatorUtilities.CreateInstance<ProcessDocumentsViewModel>(_serviceProvider, (ProcessDocumentsStep)stepId);
                 break;
             case PackageWorkflowStepId.SelectOutput:
                 vm = _serviceProvider.GetRequiredService<SelectOutputViewModel>();
