@@ -60,6 +60,33 @@ public class CreateOrderViewModel : ViewModel, IPackageWorkflowStepViewModel
         }
     } = string.Empty;
 
+    /// <summary>
+    /// Gets the System ID prefixes that can be used to narrow down the available orders.
+    /// </summary>
+    public IReadOnlyList<string> SystemIdPrefixOptions => SystemIdPrefixes.ValidPrefixes;
+
+    /// <summary>
+    /// Gets or sets the System ID prefix used to filter the available orders.
+    /// When <see langword="null"/>, orders are not filtered by System ID.
+    /// </summary>
+    public string? SelectedSystemIdPrefix
+    {
+        get;
+        set
+        {
+            if (!SetProperty(ref field, value))
+            {
+                return;
+            }
+
+            SelectedOrder = null;
+            OrdersView.Refresh();
+            OnPropertyChanged(nameof(HasNoResults));
+
+            ClearCommand.RaiseCanExecuteChanged();
+        }
+    }
+
 
 
     public Order? SelectedOrder
@@ -212,12 +239,13 @@ public class CreateOrderViewModel : ViewModel, IPackageWorkflowStepViewModel
 
     private bool CanClearSelection()
     {
-        return string.IsNullOrWhiteSpace(FilterText) == false || SelectedOrder is not null;
+        return string.IsNullOrWhiteSpace(FilterText) == false || SelectedSystemIdPrefix is not null || SelectedOrder is not null;
     }
 
     private void ClearSelection()
     {
         FilterText = string.Empty;
+        SelectedSystemIdPrefix = null;
         SelectedOrder = null;
         OrdersView.Refresh();
     }
@@ -225,6 +253,12 @@ public class CreateOrderViewModel : ViewModel, IPackageWorkflowStepViewModel
     private bool FilterOrder(object item)
     {
         if (item is not Order order)
+        {
+            return false;
+        }
+
+        if (SelectedSystemIdPrefix is not null &&
+            !string.Equals(SystemIdPrefixes.GetPrefix(order.SystemId), SelectedSystemIdPrefix, StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }

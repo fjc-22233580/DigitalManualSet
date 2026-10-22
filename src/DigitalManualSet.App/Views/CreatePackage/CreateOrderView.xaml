@@ -34,10 +34,20 @@
                 Content="Create Order"
                 DockPanel.Dock="Right" />
 
+            <ComboBox MinWidth="100"
+                      Margin="12,12,12,12"
+                      DockPanel.Dock="Right"
+                      ItemsSource="{Binding SystemIdPrefixOptions}"
+                      SelectedItem="{Binding SelectedSystemIdPrefix}"
+                      ToolTip="Filter by System ID prefix" />
+
+
             <TextBox
                 Margin="12"
                 DockPanel.Dock="Left"
                 Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" />
+
+          
 
 
         </DockPanel>
