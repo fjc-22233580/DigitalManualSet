@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:createPackage="clr-namespace:DigitalManualSet.App.ViewModels.CreatePackage"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:DigitalManualSet.App.Views.CreatePackage"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance createPackage:DocumentRowViewModel}"
     d:DesignHeight="450"
@@ -16,17 +15,20 @@
         Padding="12,8,0,8"
         Style="{StaticResource ContainerStyle}">
 
-        <Grid ShowGridLines="True" >
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="NumColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="DocNumberColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="NameColumn" />
-                <ColumnDefinition Width="Auto" SharedSizeGroup="RevisionColumn"/>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="RevisionColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="CategoryColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="StatusColumn" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Margin="0,0,12,0" Text="{Binding RowNumber}" />
+            <TextBlock
+                Grid.Column="0"
+                Margin="0,0,12,0"
+                Text="{Binding RowNumber}" />
 
             <TextBlock
                 Grid.Column="1"

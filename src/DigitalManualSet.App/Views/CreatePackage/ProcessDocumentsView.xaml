@@ -101,10 +101,7 @@
                         </Grid.RowDefinitions>
 
                         <!--  Header  -->
-                        <Grid
-                            Grid.Row="0"
-                            Margin="12,0,0,8"
-                            ShowGridLines="True">
+                        <Grid Grid.Row="0" Margin="12,0,0,8">
 
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="NumColumn" />
