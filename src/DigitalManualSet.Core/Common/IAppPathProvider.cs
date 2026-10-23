@@ -33,4 +33,9 @@ public interface IAppPathProvider
     /// </summary>
     string TestDocuments { get; }
 
+    /// <summary>
+    /// Gets the open orders file path - held in I Drive mapped network location.
+    /// </summary>
+    string OpenOrdersFilePath { get; }
+
 }

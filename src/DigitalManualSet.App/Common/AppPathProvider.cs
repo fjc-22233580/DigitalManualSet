@@ -58,6 +58,9 @@ public class AppPathProvider : IAppPathProvider
     /// Gets the test documents folder path.
     /// </summary>
     public string TestDocuments => Path.Combine(LocalAppDataFolder, "Test Documents");
-
-
+    
+    /// <summary>
+    /// Gets the open orders file path - held in I Drive mapped network location.
+    /// </summary>
+    public string OpenOrdersFilePath => @"I:\Data\Mfg\Opns\Serial Recording\MACHDTC.txt";
 }

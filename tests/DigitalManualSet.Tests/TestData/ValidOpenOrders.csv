@@ -1,13 +1,41 @@
-OrderNumber,CustomerName,SystemID
-A483921,Northbridge Engineering Ltd,8801MTB36894
-A175604,Westfield Materials Testing,8802MTB41726
-A928317,Oakridge Manufacturing Ltd,8003MTB29581
-A641852,Precision Components UK,8801MTB50342
-A307496,Redwood Industrial Systems,8802MTB18473
-A856203,Atlas Testing Solutions,8803MTB67215
-A214789,Meridian Engineering Group,8801MTB24968
-A793145,Stonebridge Technologies,8802MTB73104
-A562038,Clearwater Manufacturing,8003MTB45892
-A489670,Vertex Materials Research,8801MTB81637
-A135824,Harbour Engineering Ltd,8802MTB39056
-A907261,Summit Test Laboratories,8003MTB92418
+Col.order No||','||cust Ord Customer Api.get Name(co.customer No)||','||to Char(col.cf$ Instron Ship Date,'dd/mm/yyyy')||','||col.catalog No||','||(buy Qty Due-decode(catalog Type Db,'inv',qty Shipped,null))||','||co.cf$ System Id	
+A123456,Acme Materials Testing Ltd,15/01/2030,A620-822,1,8801MTB18452
+A123456,Acme Materials Testing Ltd,15/01/2030,A620-823,2,8801MTB18452
+A123456,Acme Materials Testing Ltd,15/01/2030,A620-824,1,8801MTB18452
+A123457,Pioneer Engineering Group,15/01/2030,300-8950-9396,1,E3BMTB18561
+A123457,Pioneer Engineering Group,15/01/2030,300-8950-9395,1,E3BMTB18561
+A123458,Vertex Research Laboratories,01/02/2030,14-1003,1,8802MTB17644
+A123459,Northbridge Calibration Services,07/01/2019,62-51-55,1,STOCK
+A123459,Northbridge Calibration Services,07/01/2019,62-51-56,3,STOCK
+A123460,Summit Industrial Systems,07/01/2019,97-3-1054,1,VHSMTB15421
+A123461,Advanced Polymer Testing,20/03/2019,77-13-53,30,E10LMTB17882
+A123462,Meridian Quality Labs,08/02/2019,SFL-2644,1,
+A123462,Meridian Quality Labs,08/02/2019,SFL-2643,1,
+A123463,Global Aerospace Materials,15/01/2030,14-1003,1,8803MTM14562
+A123464,Innovate Manufacturing Ltd,07/01/2019,A1412-1021,1,E1LMTB17756
+A123465,Precision Test Solutions,23/01/2019,110-4-1072,2,8805MTL6021
+A123465,Precision Test Solutions,23/01/2019,110-5-1029,1,8805MTL6021
+A123466,Euro Mechanical Research,08/01/2019,205K93,8,8806MTB17148
+A123466,Euro Mechanical Research,08/01/2019,T625-527,4,INVALID123
+A123466,Euro Mechanical Research,08/01/2019,66-1-235,4,8806MTB17148
+A123467,Titan Validation Group,11/04/2030,77-88-12,2,E20BMTB18604
+A123468,Omega Scientific Instruments,12/04/2030,88-14-56,1,ABC123
+A123469,Quantum Validation Ltd,18/05/2030,99-12-445,1,8800MTB18291
+A123469,Quantum Validation Ltd,18/05/2030,99-12-446,2,8800MTB18291
+A123470,BluePeak Engineering,22/07/2030,44-66-102,1,E3LMTB18477
+A123470,BluePeak Engineering,22/07/2030,44-66-103,1,E3LMTB18477
+A123470,BluePeak Engineering,22/07/2030,44-66-104,1,E3LMTB18477
+A123471,Atlas Materials Group,14/03/2030,SFL-3001,5,STOCK
+A123472,Westlake Research Labs,09/09/2030,14-2002,1,E10BMTB17965
+A123473,Evergreen Manufacturing,04/04/2030,120-1-998,2,
+A123473,Evergreen Manufacturing,04/04/2030,120-1-999,2,
+A123474,Prime Calibration Services,16/06/2030,205K95,1,VHSMTB15842
+A123475,Aurora Testing Solutions,11/08/2030,A1412-1055,3,8852MTB17491
+A123475,Aurora Testing Solutions,11/08/2030,A1412-1056,1,8852MTB17491
+A123476,Continental Metals Ltd,30/01/2030,66-1-447,10,8805MTL6235
+A123477,Continental Metals Ltd,30/01/2030,66-1-448,4,BADID123
+A123478,Delta Industrial Systems,15/02/2030,T625-900,2,E20LMTB18723
+A123479,Delta Industrial Systems,15/02/2030,T625-901,2,E20LMTB18723
+A123480,Global Mechanical Labs,12/12/2030,77-21-501,1,8803MTM14873
+A123481,Global Mechanical Labs,12/12/2030,77-21-502,1,STOCK
+A123482,Fusion Research Group,07/10/2030,88-77-321,6,8802MTB17954

@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:DigitalManualSet.App.ViewModels"
+    xmlns:views="clr-namespace:DigitalManualSet.App.Views"
     d:DataContext="{d:DesignInstance viewModels:SettingsViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -26,18 +27,10 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock
-            Grid.Row="0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontSize="32"
-            Text="Settings View" />
-
-
         <!--  Appearance section: controls related to visual theme selection.  -->
         <TextBlock
             Grid.Row="1"
-            Margin="8,0,0,10"
+            Margin="8,20,0,10"
             Style="{StaticResource BodyStrongTextBlockStyle}"
             Text="Appearance" />
 
@@ -84,9 +77,6 @@
                     SelectedItem="{Binding SelectedTheme}"
                     SelectedValuePath="Value" />
             </Grid>
-
-
-
         </Border>
 
 
@@ -97,62 +87,14 @@
             Style="{StaticResource BodyStrongTextBlockStyle}"
             Text="Application Settings" />
 
-        <Border Grid.Row="4" Style="{StaticResource ContainerStyle}">
+        <ItemsControl Grid.Row="4"  ItemsSource="{Binding PathSettings}">
+            <ItemsControl.ItemTemplate>
 
-            <Grid Margin="20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="45" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <TextBlock
-                    Grid.Column="0"
-                    Padding="0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontFamily="{StaticResource SymbolThemeFontFamily}"
-                    FontSize="22"
-                    Text="&#xE713;" />
-
-                <StackPanel
-                    Grid.Column="1"
-                    Margin="12"
-                    Orientation="Vertical">
-                    <TextBlock FontSize="14" Text="Working Folder" />
-                    <TextBlock
-                        FontSize="12"
-                        Opacity="0.7"
-                        Style="{StaticResource CaptionTextBlockStyle}">
-                        The working folder where temporary packages will be stored.
-                    </TextBlock>
-
-
-                </StackPanel>
-
-                <!--  Shows the currently configured working folder path from Settings.WorkingFolderPath.  -->
-                <TextBlock
-                    Grid.Column="2"
-                    VerticalAlignment="Center"
-                    FontSize="12"
-                    Style="{StaticResource BodyTextBlockStyle}"
-                    Text="{Binding WorkingFolderPath}" />
-
-                <!--
-                    Open button invokes OpenWorkingFolderCommand which ensures the folder exists
-                    and opens it in the system file explorer.
-                -->
-                <Button
-                    Grid.Column="3"
-                    Command="{Binding OpenWorkingFolderCommand}"
-                    Content="Open"
-                    Style="{StaticResource DefaultButtonStyle}" />
-            </Grid>
-
-
-
-        </Border>
+                <DataTemplate>
+                    <views:PathSettingSectionView Margin="0,0,0,10" DataContext="{Binding}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
     </Grid>
 </UserControl>

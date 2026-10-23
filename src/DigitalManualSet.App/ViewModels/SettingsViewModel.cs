@@ -1,8 +1,7 @@
 ﻿using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Services;
 using DigitalManualSet.App.Settings;
-using System.Diagnostics;
-using System.IO;
+using DigitalManualSet.Core.Common;
 
 namespace DigitalManualSet.App.ViewModels;
 
@@ -19,6 +18,7 @@ public class SettingsViewModel : ViewModel, IScreenViewModel
 
     private readonly AppSettingsService _appSettingsService;
     private readonly AppThemeService _appThemeService;
+    private readonly IAppPathProvider _appPathProvider;
     private ComboBoxItemViewModel<AppTheme> _selectedTheme;
 
     #endregion
@@ -30,10 +30,11 @@ public class SettingsViewModel : ViewModel, IScreenViewModel
     /// </summary>
     /// <param name="appSettingsService">Service for loading and saving application settings.</param>
     /// <param name="appThemeService">Service used to apply theme changes to the UI.</param>
-    public SettingsViewModel(AppSettingsService appSettingsService, AppThemeService appThemeService)
+    public SettingsViewModel(AppSettingsService appSettingsService, AppThemeService appThemeService, IAppPathProvider appPathProvider)
     {
         _appSettingsService = appSettingsService;
         _appThemeService = appThemeService;
+        _appPathProvider = appPathProvider;
         ThemeColors =
         [
             new ComboBoxItemViewModel<AppTheme>(AppTheme.System, "Use system theme"),
@@ -44,12 +45,27 @@ public class SettingsViewModel : ViewModel, IScreenViewModel
         // Set the drop down to match our depersisted value.
         _selectedTheme = ThemeColors.First(theme => theme.Value == _appSettingsService.Settings.Theme);
 
-        OpenWorkingFolderCommand = new RelayCommand(OpenWorkingFolder);
+        PathSettings.Add(new PathSettingSectionViewModel(iconGlyph: Icons.Folder,
+            sectionTitle: "Working Folder",
+            sectionDescription: "The working folder where temporary packages will be stored.",
+            path: _appSettingsService.Settings.WorkingFolderPath));
+        
+        PathSettings.Add(new PathSettingSectionViewModel(iconGlyph: Icons.Settings,
+            sectionTitle: "Open Orders File",
+            sectionDescription: "The file where open orders are stored.",
+            path: _appPathProvider.OpenOrdersFilePath));
+        
+        PathSettings.Add(new PathSettingSectionViewModel(iconGlyph: Icons.Report,
+            sectionTitle: "Logs Folder",
+            sectionDescription: "The folder where application logs are stored.",
+            path: _appPathProvider.LogsFolder));
     }
 
     #endregion
 
     #region Properties
+
+    public List<PathSettingSectionViewModel> PathSettings { get; } = new List<PathSettingSectionViewModel>();
 
     /// <summary>
     /// Gets the available theme options shown in the UI drop down.
@@ -74,16 +90,6 @@ public class SettingsViewModel : ViewModel, IScreenViewModel
         }
     }
 
-    /// <summary>
-    /// Gets the command that opens the configured working folder using file explorer.
-    /// </summary>
-    public RelayCommand OpenWorkingFolderCommand { get; }
-
-    /// <summary>
-    /// Gets the path to the configured working folder from persisted settings.
-    /// </summary>
-    public string WorkingFolderPath => _appSettingsService.Settings.WorkingFolderPath;
-
     #endregion
 
     #region Methods
@@ -99,24 +105,5 @@ public class SettingsViewModel : ViewModel, IScreenViewModel
         await _appSettingsService.SaveAsync();
     }
 
-    /// <summary>
-    /// Ensures the working folder exists and opens it in the system file explorer.
-    /// </summary>
-    private void OpenWorkingFolder()
-    {
-        var path = _appSettingsService.Settings.WorkingFolderPath;
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = path,
-            UseShellExecute = true
-        });
-    }
-
     #endregion
-
 }
