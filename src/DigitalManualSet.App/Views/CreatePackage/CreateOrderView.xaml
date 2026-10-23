@@ -4,12 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:createPackage="clr-namespace:DigitalManualSet.App.ViewModels.CreatePackage"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:DigitalManualSet.App.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:validation="clr-namespace:DigitalManualSet.App.Views.Common.Validation"
     d:DataContext="{d:DesignInstance createPackage:CreateOrderViewModel}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
     mc:Ignorable="d">
 
     <Grid>
@@ -34,21 +30,18 @@
                 Content="Create Order"
                 DockPanel.Dock="Right" />
 
-            <ComboBox MinWidth="100"
-                      Margin="12,12,12,12"
-                      DockPanel.Dock="Right"
-                      ItemsSource="{Binding SystemIdPrefixOptions}"
-                      SelectedItem="{Binding SelectedSystemIdPrefix}"
-                      ToolTip="Filter by System ID prefix" />
-
+            <ComboBox
+                MinWidth="100"
+                Margin="0,12,12,12"
+                DockPanel.Dock="Right"
+                ItemsSource="{Binding SystemIdPrefixOptions}"
+                SelectedItem="{Binding SelectedSystemIdPrefix}"
+                ToolTip="Filter by System ID prefix" />
 
             <TextBox
                 Margin="12"
                 DockPanel.Dock="Left"
                 Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" />
-
-          
-
 
         </DockPanel>
 
@@ -60,10 +53,7 @@
 
             <StackPanel>
 
-
-
                 <TextBlock Margin="0,0,0,12" Text="Enter all details to proceed" />
-
 
                 <Grid>
 
@@ -77,8 +67,6 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-
-
 
                     <TextBlock
                         Grid.Row="0"
@@ -120,7 +108,6 @@
                         Text="{Binding SystemId, UpdateSourceTrigger=PropertyChanged}" />
 
                 </Grid>
-
 
                 <TextBlock Text="{Binding ValidationMessage}" Visibility="{Binding ValidationMessage, Converter={StaticResource StringToVisibility}}" />
 
