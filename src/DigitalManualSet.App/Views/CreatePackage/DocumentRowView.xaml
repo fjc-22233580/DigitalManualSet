@@ -6,16 +6,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance createPackage:DocumentRowViewModel}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
     mc:Ignorable="d">
 
-    <Border
-        Margin="0,2,0,2"
-        Padding="12,8,0,8"
-        Style="{StaticResource ContainerStyle}">
+    <Border Height="38" Style="{StaticResource ContainerStyle}">
 
-        <Grid>
+
+        <Grid Margin="12,0,0,0" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="NumColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="DocNumberColumn" />
@@ -23,37 +19,61 @@
                 <ColumnDefinition Width="Auto" SharedSizeGroup="RevisionColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="CategoryColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="StatusColumn" />
+                <ColumnDefinition Width="Auto" SharedSizeGroup="DeleteColumn" />
             </Grid.ColumnDefinitions>
 
             <TextBlock
                 Grid.Column="0"
                 Margin="0,0,12,0"
+                VerticalAlignment="Center"
                 Text="{Binding RowNumber}" />
 
             <TextBlock
                 Grid.Column="1"
                 Margin="0,0,0,0"
+                VerticalAlignment="Center"
                 Text="{Binding DocumentNumber}" />
             <TextBlock
                 Grid.Column="2"
                 Margin="12,0,0,0"
+                VerticalAlignment="Center"
                 Text="{Binding DocumentName}" />
             <TextBlock
                 Grid.Column="3"
                 Margin="12,0,0,0"
+                VerticalAlignment="Center"
                 Text="{Binding Revision}" />
 
             <TextBlock
                 Grid.Column="4"
                 Margin="12,0,0,0"
+                VerticalAlignment="Center"
                 Text="{Binding Category}" />
 
             <TextBlock
                 Grid.Column="5"
                 Margin="12,0,0,0"
+                VerticalAlignment="Center"
                 Text="{Binding Status}" />
+
+            <Button
+                Grid.Column="6"
+                Width="28"
+                Height="28"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Command="{Binding DeleteDocumentCommand}"
+                Style="{StaticResource SmallIconButtonStyle}"
+                ToolTip="Delete"
+                Visibility="{Binding IsManuallyAdded, Converter={StaticResource BoolToVisibility}}">
+
+                <TextBlock
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="14"
+                    Text="&#xE74D;" />
+
+            </Button>
         </Grid>
     </Border>
-
-
 </UserControl>

@@ -1,4 +1,5 @@
 ﻿using DigitalManualSet.App.Common;
+using DigitalManualSet.App.Services.Interfaces;
 using DigitalManualSet.Core.Documents;
 
 namespace DigitalManualSet.App.ViewModels.CreatePackage;
@@ -8,27 +9,64 @@ namespace DigitalManualSet.App.ViewModels.CreatePackage;
 /// </summary>
 public class DocumentRowViewModel : ViewModel
 {
+    #region Events
+
+    public event EventHandler DeleteRequested;
+
+    #endregion
+
+    #region Fields
+
     private readonly Document _document;
     private readonly IDocumentDownloadService _downloadService;
     private readonly string _destinationFolder;
+    private readonly IMessageService? _messageService;
+
+    #endregion
+
+    #region Constructor
 
     /// <summary>
     /// Initializes a new instance of the DocumentRowViewModel.
     /// </summary>
-    public DocumentRowViewModel(int rowNumber, Document document, IDocumentDownloadService downloadService, string destinationFolder)
+    /// <param name="rowNumber">The row number.</param>
+    /// <param name="document">The document.</param>
+    /// <param name="downloadService">The download service.</param>
+    /// <param name="destinationFolder">The destination folder.</param>
+    /// <param name="isManuallyAdded">if set to <c>true</c> [is manually added].</param>
+    /// <param name="messageService">The message service.</param>
+    public DocumentRowViewModel(int rowNumber,
+        Document document,
+        IDocumentDownloadService downloadService,
+        string destinationFolder,
+        bool isManuallyAdded = false,
+        IMessageService? messageService = null)
     {
         RowNumber = rowNumber;
+        IsManuallyAdded = isManuallyAdded;
         _document = document;
         _downloadService = downloadService;
         _destinationFolder = destinationFolder;
+        _messageService = messageService;
 
         Status = "Pending";
+
+        DeleteDocumentCommand = new RelayCommand(DeleteDocument);
     }
+
+    #endregion
+
+    #region Properties
 
     /// <summary>
     /// Gets the row number (1-based index).
     /// </summary>
     public int RowNumber { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether this instance is manually added.
+    /// </summary>
+    public bool IsManuallyAdded { get; }
 
     /// <summary>
     /// Gets the document's identifying number.
@@ -74,6 +112,15 @@ public class DocumentRowViewModel : ViewModel
     }
 
     /// <summary>
+    /// Gets the delete document command.
+    /// </summary>
+    public RelayCommand DeleteDocumentCommand { get; }
+
+    #endregion
+
+    #region Methods
+
+    /// <summary>
     /// Downloads the document asynchronously to the destination folder.
     /// Updates Status property with progress and result messages.
     /// </summary>
@@ -107,4 +154,21 @@ public class DocumentRowViewModel : ViewModel
             IsDownloading = false;
         }
     }
+
+    /// <summary>
+    /// Deletes this document, if the user has confirmed.
+    /// </summary>
+    private void DeleteDocument()
+    {
+        if (_messageService is not null)
+        {
+            var result = _messageService.ShowQuestion("Confirm deletion", $"Do you wish to delete document: {DocumentNumber}?");
+            if (result)
+            {
+                DeleteRequested?.Invoke(this, EventArgs.Empty);
+            }
+        }
+    }
+
+    #endregion
 }
