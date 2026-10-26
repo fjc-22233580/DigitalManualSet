@@ -5,6 +5,8 @@ using DigitalManualSet.App.Services;
 using DigitalManualSet.App.Settings;
 using DigitalManualSet.App.ViewModels;
 using DigitalManualSet.App.ViewModels.CreatePackage;
+using DigitalManualSet.App.ViewModels.CreatePackage.Dialogs;
+using DigitalManualSet.App.Views.Dialogs;
 using DigitalManualSet.Core.Common;
 using DigitalManualSet.Core.Documents;
 using DigitalManualSet.Core.Orders;
@@ -15,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using System.IO;
 using System.Windows;
+using DigitalManualSet.App.Services.Interfaces;
 
 namespace DigitalManualSet.App
 {
@@ -125,12 +128,23 @@ namespace DigitalManualSet.App
 
             services.AddSingleton<IDocumentValidationService, DocumentValidationService>();
 
+
+            services.AddSingleton<IAddDocumentDialogService, AddDocumentDialogService>();
+
+            services.AddSingleton<IMessageService, MessageService>();
+
+            services.AddSingleton<DarkOverlayService>();
+
+            services.AddTransient<MessageDialog>();
+
+            services.AddTransient<AddDocumentDialog>();
+            services.AddTransient<AddDocumentDialogViewModel>();
+
             services.AddTransient<CreatePackageViewModel>();
             services.AddTransient<CreateOrderViewModel>();
             services.AddTransient<ProcessDocumentsViewModel>();
             services.AddTransient<SelectOutputViewModel>();
             services.AddTransient<CompletePackageViewModel>();
-
 
             services.AddTransient<OpenPackageViewModel>();
             services.AddTransient<SettingsViewModel>();

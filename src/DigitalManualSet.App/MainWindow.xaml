@@ -70,5 +70,13 @@
             <ContentControl Content="{Binding CurrentScreen.ViewModel}" />
         </Border>
 
+        <!--  Dark overlay, which is shown when modals are displays  -->
+        <Border
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            Background="Black"
+            Opacity="0.5"
+            Visibility="{Binding ShowDarkOverlay, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+
     </Grid>
 </Window>

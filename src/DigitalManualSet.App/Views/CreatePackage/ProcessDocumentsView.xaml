@@ -7,8 +7,6 @@
     xmlns:local="clr-namespace:DigitalManualSet.App.Views.CreatePackage"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance createPackage:ProcessDocumentsViewModel}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
     mc:Ignorable="d">
 
     <Grid Margin="10">
@@ -28,16 +26,15 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-
-            <TextBlock Grid.Row="0" Text="Document Source:" />
+            <TextBlock
+                Grid.Row="0"
+                Margin="8,0,0,10"
+                Text="Document Source:" />
 
             <Border
                 Grid.Row="1"
-                Margin="0,10,0,0"
                 Padding="10"
-                BorderBrush="DarkGray"
-                BorderThickness="{StaticResource ExpanderBorderThemeThickness}"
-                CornerRadius="{StaticResource OverlayCornerRadius}">
+                Style="{StaticResource ContainerStyle}">
 
                 <DockPanel LastChildFill="False">
 
@@ -62,13 +59,9 @@
                                 <Run Text="{Binding DestinationFolder, Mode=OneWay}" />
                             </Hyperlink>
                         </TextBlock>
-
-
                     </StackPanel>
-
                 </DockPanel>
             </Border>
-
         </Grid>
 
 
@@ -79,112 +72,119 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="Documents:" />
+            <TextBlock
+                Grid.Row="0"
+                Margin="8,0,0,10"
+                Text="Documents:" />
 
+            <ScrollViewer Grid.Row="1">
 
+                <Grid Grid.IsSharedSizeScope="True">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Header  -->
+                    <Grid Grid.Row="0" Margin="12,0,0,8">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="NumColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="DocNumberColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="NameColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="RevisionColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="CategoryColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="StatusColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="DeleteColumn" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="SemiBold"
+                            Text="Document No." />
+
+                        <TextBlock
+                            Grid.Column="2"
+                            Margin="12,0"
+                            FontWeight="SemiBold"
+                            Text="Document Name" />
+
+                        <TextBlock
+                            Grid.Column="3"
+                            Margin="13,0,0,0"
+                            FontWeight="SemiBold"
+                            Text="Revision" />
+
+                        <TextBlock
+                            Grid.Column="4"
+                            Margin="13,0,0,0"
+                            FontWeight="SemiBold"
+                            Text="Category" />
+
+                        <TextBlock
+                            Grid.Column="5"
+                            Margin="13,0,0,0"
+                            FontWeight="SemiBold"
+                            Text="Status" />
+
+                        <TextBlock
+                            Grid.Column="6"
+                            Margin="13,0,0,0"
+                            FontWeight="SemiBold"
+                            Text="Delete"
+                            Visibility="{Binding IsAnyManuallyAddedDocument, Converter={StaticResource BoolToVisibility}}" />
+                    </Grid>
+
+                    <ItemsControl Grid.Row="1" ItemsSource="{Binding AvailableDocuments}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <local:DocumentRowView DataContext="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="0,20,0,0">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock
+                Grid.Row="0"
+                Margin="8,0,0,10"
+                Text="Download Status:" />
 
             <Border
                 Grid.Row="1"
-                Margin="0,10,0,0"
                 Padding="10"
-                BorderBrush="DarkGray"
-                BorderThickness="{StaticResource ExpanderBorderThemeThickness}"
-                CornerRadius="{StaticResource OverlayCornerRadius}">
+                Style="{StaticResource ContainerStyle}">
 
+                <StackPanel>
 
-                <ScrollViewer>
+                    <TextBlock Margin="0,0,0,8" Text="{Binding DownloadStatus}" />
 
-                    <Grid Grid.IsSharedSizeScope="True">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
+                    <ProgressBar
+                        Maximum="100"
+                        Minimum="0"
+                        Value="{Binding OverallProgress}" />
 
-                        <!--  Header  -->
-                        <Grid Grid.Row="0" Margin="12,0,0,8">
+                    <Button
+                        Margin="12"
+                        HorizontalAlignment="Center"
+                        Command="{Binding BeginDownloadCommand}"
+                        Content="Download all" />
 
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="NumColumn" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="DocNumberColumn" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="NameColumn" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="RevisionColumn" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="CategoryColumn" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="StatusColumn" />
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock
-                                Grid.Column="1"
-                                FontWeight="SemiBold"
-                                Text="Document No." />
-
-                            <TextBlock
-                                Grid.Column="2"
-                                Margin="12,0"
-                                FontWeight="SemiBold"
-                                Text="Document Name" />
-
-                            <TextBlock
-                                Grid.Column="3"
-                                Margin="13,0,0,0"
-                                FontWeight="SemiBold"
-                                Text="Revision" />
-
-                            <TextBlock
-                                Grid.Column="4"
-                                Margin="13,0,0,0"
-                                FontWeight="SemiBold"
-                                Text="Category" />
-
-                            <TextBlock
-                                Grid.Column="5"
-                                Margin="13,0,0,0"
-                                FontWeight="SemiBold"
-                                Text="Status" />
-                        </Grid>
-
-
-
-                        <ItemsControl Grid.Row="1" ItemsSource="{Binding AvailableDocuments}">
-
-
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <local:DocumentRowView DataContext="{Binding}" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-
-                        </ItemsControl>
-                    </Grid>
-                </ScrollViewer>
-
-
+                    <Button
+                        Margin="0"
+                        HorizontalAlignment="Center"
+                        Command="{Binding AddDocumentCommand}"
+                        Content="Add Document" />
+                </StackPanel>
             </Border>
-
-
         </Grid>
-
-        <StackPanel Grid.Row="2" Margin="0,12,0,0">
-
-            <Grid Margin="0,0,0,6">
-                <TextBlock Text="{Binding DownloadStatus}" />
-
-
-            </Grid>
-
-            <ProgressBar
-                Maximum="100"
-                Minimum="0"
-                Value="{Binding OverallProgress}" />
-        </StackPanel>
-
-
-        <Button
-            Grid.Row="3"
-            Margin="12"
-            HorizontalAlignment="Center"
-            Command="{Binding BeginDownloadCommand}"
-            Content="Download all" />
-
     </Grid>
-
 </UserControl>
