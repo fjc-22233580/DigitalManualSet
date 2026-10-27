@@ -1,11 +1,10 @@
 ﻿using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Services;
 using DigitalManualSet.App.ViewModels.CreatePackage.Interfaces;
-using DigitalManualSet.Core.Documents;
-using DigitalManualSet.Core.Orders;
 using DigitalManualSet.Core.PackageCreation;
 using DigitalManualSet.Core.PackageCreation.Workflow;
 using DigitalManualSet.Core.Workflow;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DigitalManualSet.App.ViewModels.CreatePackage;
@@ -46,14 +45,12 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
     /// Initializes a new instance of the <see cref="CreatePackageViewModel" /> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
-    /// <param name="stepViewModelResolver">Resolver used to obtain the concrete view-model for the current workflow step.</param>
-    /// <param name="openOrderProvider">The open order provider.</param>
-    /// <param name="documentProvider">The document provider.</param>
-    public CreatePackageViewModel(ILogger<CreatePackageViewModel> logger, IPackageWorkflowStepViewModelResolver stepViewModelResolver, IOpenOrderProvider openOrderProvider, IDocumentProvider documentProvider)
+    /// <param name="serviceProvider">The service provider.</param>
+    public CreatePackageViewModel(ILogger<CreatePackageViewModel> logger, IServiceProvider serviceProvider)
     {
         _logger = logger;
-        _stepViewModelResolver = stepViewModelResolver;
-        _workflow = PackageWorkflowFactory.Create(openOrderProvider, documentProvider);
+        _stepViewModelResolver = serviceProvider.GetRequiredService<IPackageWorkflowStepViewModelResolver>();
+        _workflow = PackageWorkflowFactory.Create(serviceProvider);
 
         NextCommand = new RelayCommand(async () => await MoveNextAsync(), () => CanMoveNext);
         BackCommand = new RelayCommand(async () => await MoveBackAsync(), () => CanMoveBack);

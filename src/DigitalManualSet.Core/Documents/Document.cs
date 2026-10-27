@@ -1,4 +1,6 @@
-﻿namespace DigitalManualSet.Core.Documents;
+﻿using DigitalManualSet.Core.Models;
+
+namespace DigitalManualSet.Core.Documents;
 
 /// <summary>
 /// Represents a document with metadata and validation state.
@@ -24,6 +26,16 @@ public class Document
     /// Gets the document's category.
     /// </summary>
     public string Category { get; }
+
+    /// <summary>
+    /// Gets the type of this document.
+    /// </summary>
+    public DocumentType Type { get; } = DocumentType.Manual;
+
+    /// <summary>
+    /// Gets or sets the output relative path of this document when on the destination USB.
+    /// </summary>
+    public string? OutputRelativePath { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the document has been validated.

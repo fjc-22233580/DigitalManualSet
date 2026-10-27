@@ -1,7 +1,9 @@
 ﻿using DigitalManualSet.Core.Documents;
 using DigitalManualSet.Core.Orders;
 using DigitalManualSet.Core.PackageCreation.Workflow;
+using DigitalManualSet.Core.Services;
 using DigitalManualSet.Core.Workflow;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DigitalManualSet.Core.PackageCreation;
 
@@ -13,20 +15,19 @@ public static class PackageWorkflowFactory
     /// <summary>
     /// Creates the default package creation workflow.
     /// </summary>
-    /// <param name="openOrderProvider">The open order provider.</param>
-    /// <param name="documentProvider">The document provider.</param>
+    /// <param name="serviceProvider">The service provider.</param>
     /// <returns>
     /// A configured package creation workflow.
     /// </returns>
-    public static Workflow<PackageWorkflowStepId> Create(IOpenOrderProvider openOrderProvider, IDocumentProvider documentProvider)
+    public static Workflow<PackageWorkflowStepId> Create(IServiceProvider serviceProvider)
     {
         var package = new Package();
 
         return new Workflow<PackageWorkflowStepId>(
         [
-            new CreateOrderStep(package, openOrderProvider),
-            new ProcessDocumentsStep(package, documentProvider),
-            new SelectOutputStep(package),
+            new CreateOrderStep(package, serviceProvider.GetRequiredService<IOpenOrderProvider>()),
+            new ProcessDocumentsStep(package, serviceProvider.GetRequiredService<IDocumentProvider>()),
+            new SelectOutputStep(package, serviceProvider.GetRequiredService<IPackageWriter>()),
         ]);
     }
 }
