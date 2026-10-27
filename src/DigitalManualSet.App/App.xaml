@@ -17,6 +17,7 @@
 
             <converters:BooleanToVisibilityConverter x:Key="BoolToVisibility" />
             <converters:StringToVisibilityConverter x:Key="StringToVisibility" />
+            <converters:BytesToReadableSizeConverter x:Key="BytesToReadableSizeConverter" />
 
             <!--
                 ContainerStyle: used to visually group related settings with consistent

@@ -8,6 +8,8 @@ namespace DigitalManualSet.Core.PackageCreation;
 /// </summary>
 public class Package
 {
+    #region Constructor
+
     /// <summary>
     /// Initializes a new instance of the Package class.
     /// </summary>
@@ -15,6 +17,20 @@ public class Package
     {
 
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// Gets or sets the stage that this package is at.
+    /// </summary>
+    public PackageStage Stage { get; set; }
+
+    /// <summary>
+    /// Gets or sets the USB output details.
+    /// </summary>
+    public PackageOutput Output { get; set; }
 
     /// <summary>
     /// Gets or sets the working folder path for the package.
@@ -30,6 +46,10 @@ public class Package
     /// Gets the list of documents in this package.
     /// </summary>
     public List<Document>? Documents { get; private set; } = null;
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// Sets the package documents to the provided validated documents.
@@ -61,4 +81,6 @@ public class Package
         Documents?.Clear();
         Documents = null;
     }
+
+    #endregion
 }

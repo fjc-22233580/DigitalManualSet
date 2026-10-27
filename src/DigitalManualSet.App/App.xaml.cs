@@ -2,6 +2,7 @@
 using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Navigation;
 using DigitalManualSet.App.Services;
+using DigitalManualSet.App.Services.Interfaces;
 using DigitalManualSet.App.Settings;
 using DigitalManualSet.App.ViewModels;
 using DigitalManualSet.App.ViewModels.CreatePackage;
@@ -10,14 +11,15 @@ using DigitalManualSet.App.Views.Dialogs;
 using DigitalManualSet.Core.Common;
 using DigitalManualSet.Core.Documents;
 using DigitalManualSet.Core.Orders;
+using DigitalManualSet.Core.Services;
 using DigitalManualSet.Infrastructure.Documents;
 using DigitalManualSet.Infrastructure.Orders;
+using DigitalManualSet.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System.IO;
 using System.Windows;
-using DigitalManualSet.App.Services.Interfaces;
 
 namespace DigitalManualSet.App
 {
@@ -124,12 +126,16 @@ namespace DigitalManualSet.App
                     return new CsvDocumentProvider(filePath);
                 });
 
+            services.AddSingleton<IRemovableDriveService, RemovableDriveService>();
+
             services.AddSingleton<IDocumentDownloadService>(_ => new LocalDocumentDownloadService(_appPathProvider.TestDocuments));
 
             services.AddSingleton<IDocumentValidationService, DocumentValidationService>();
 
 
             services.AddSingleton<IAddDocumentDialogService, AddDocumentDialogService>();
+
+            services.AddSingleton<IPackageWriter, PackageWriter>();
 
             services.AddSingleton<IMessageService, MessageService>();
 

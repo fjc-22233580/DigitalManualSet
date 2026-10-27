@@ -45,7 +45,7 @@ public class PackageWorkflowStepViewModelResolver : IPackageWorkflowStepViewMode
                 vm = ActivatorUtilities.CreateInstance<ProcessDocumentsViewModel>(_serviceProvider, (ProcessDocumentsStep)stepId);
                 break;
             case PackageWorkflowStepId.SelectOutput:
-                vm = _serviceProvider.GetRequiredService<SelectOutputViewModel>();
+                vm = ActivatorUtilities.CreateInstance<SelectOutputViewModel>(_serviceProvider, (SelectOutputStep)stepId);
                 break;
             case PackageWorkflowStepId.CompletePackage:
                 vm = _serviceProvider.GetRequiredService<CompletePackageViewModel>();
