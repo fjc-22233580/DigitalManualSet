@@ -28,6 +28,7 @@ public static class PackageWorkflowFactory
             new CreateOrderStep(package, serviceProvider.GetRequiredService<IOpenOrderProvider>()),
             new ProcessDocumentsStep(package, serviceProvider.GetRequiredService<IDocumentProvider>()),
             new SelectOutputStep(package, serviceProvider.GetRequiredService<IPackageWriter>()),
+            new CompletePackageStep(package)
         ]);
     }
 }

@@ -31,9 +31,9 @@ public class SelectOutputViewModel : ViewModel, IPackageWorkflowStepViewModel
     /// <param name="step">The step.</param>
     /// <param name="removableDriveService">The removable drive service.</param>
     /// <exception cref="System.ArgumentException">Expected a {nameof(CreateOrderStep)}. - step</exception>
-    public SelectOutputViewModel(IWorkflowStep<PackageWorkflowStepId> step, IRemovableDriveService removableDriveService)
+    public SelectOutputViewModel(SelectOutputStep step, IRemovableDriveService removableDriveService)
     {
-        _Model = step as SelectOutputStep ?? throw new ArgumentException($"Expected a {nameof(CreateOrderStep)}.", nameof(step)); ;
+        _Model = step ?? throw new ArgumentException($"Expected a {nameof(CreateOrderStep)}.", nameof(step));
         _removableDriveService = removableDriveService;
 
         RefreshDrives();
