@@ -59,6 +59,8 @@ namespace DigitalManualSet.App
             ConfigureServices();
             await DepersistSettings();
 
+            await ParseOpenOrders();
+
             var mainWindow = new MainWindow
             {
                 DataContext = _serviceProvider.GetRequiredService<ShellViewModel>()
@@ -66,6 +68,34 @@ namespace DigitalManualSet.App
             mainWindow.Show();
 
             base.OnStartup(e);
+        }
+
+        /// <summary>
+        /// Loads the open orders spreadsheet into the <see cref="SpreadsheetOpenOrderProvider"/> so orders
+        /// are available before the main window is shown.
+        /// </summary>
+        /// <remarks>
+        /// In DEBUG builds the spreadsheet is read from the local Documents folder instead of the configured path.
+        /// </remarks>
+        private async Task ParseOpenOrders()
+        {
+            var openOrdersService = _serviceProvider.GetRequiredService<SpreadsheetOpenOrderProvider>();
+            var appPathsProvide = _serviceProvider.GetRequiredService<IAppPathProvider>();
+            var openOrderSpreadsheet = _appPathProvider.OpenOrdersFilePath;
+
+#if DEBUG
+            // "...\Documents\Digital Manual Set\MACHINE WORK TO LIST MK2.xlsm"
+            openOrderSpreadsheet = Path.Combine(appPathsProvide.DocumentsFolder, "MACHINE WORK TO LIST MK2.xlsm");
+#endif
+            try
+            {
+                await openOrdersService.InitializeAsync(openOrderSpreadsheet);
+
+            }
+            catch (Exception e)
+            {
+               // Ignore any exceptions - we show errors to the user later.
+            }
         }
 
         /// <summary>
@@ -103,17 +133,22 @@ namespace DigitalManualSet.App
             services.AddSingleton<AppThemeService>();
             services.AddSingleton<IPackageWorkflowStepViewModelResolver, PackageWorkflowStepViewModelResolver>();
 
+            // For debugging use inbuild test data.
+            //services.AddSingleton<IOpenOrderProvider>(
+            //    serviceProvider =>
+            //    {
+            //        var filePath = Path.Combine(
+            //            AppContext.BaseDirectory,
+            //            "TestData",
+            //            "ValidOpenOrders.csv");
 
-            services.AddSingleton<IOpenOrderProvider>(
-                serviceProvider =>
-                {
-                    var filePath = Path.Combine(
-                        AppContext.BaseDirectory,
-                        "TestData",
-                        "ValidOpenOrders.csv");
+            //        return new CsvOpenOrderProvider(filePath);
+            //    });
 
-                    return new CsvOpenOrderProvider(filePath);
-                });
+            // Register the concrete provider so it can be initialised at startup, and expose the
+            // same singleton instance through IOpenOrderProvider for consumers.
+            services.AddSingleton<SpreadsheetOpenOrderProvider>();
+            services.AddSingleton<IOpenOrderProvider>(sp => sp.GetRequiredService<SpreadsheetOpenOrderProvider>());
 
             services.AddSingleton<IDocumentProvider>(
                 serviceProvider =>
