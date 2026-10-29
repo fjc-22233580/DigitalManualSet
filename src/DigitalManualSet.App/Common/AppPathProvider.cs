@@ -62,5 +62,6 @@ public class AppPathProvider : IAppPathProvider
     /// <summary>
     /// Gets the open orders file path - held in I Drive mapped network location.
     /// </summary>
-    public string OpenOrdersFilePath => @"I:\Data\Mfg\Opns\Serial Recording\MACHDTC.txt";
+    public string OpenOrdersFilePath => @"I:\data\Mfg\Opns\Planning\Pub\Bible\MACHINE WORK TO LIST MK2.xlsm";
+    
 }
