@@ -16,5 +16,5 @@ public interface IPackageWriter
     /// <param name="progress">The progress update mechanism.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
-    Task WriteDocumentsAsync(Package package, RemovableDrive destination, IProgress<PackageWriteProgress>? progress = null, CancellationToken cancellationToken = default);
+    Task WriteDocumentsAsync(Package package, RemovableDrive destination, IProgress<PackageCreationProgress>? progress = null, CancellationToken cancellationToken = default);
 }

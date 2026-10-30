@@ -59,6 +59,8 @@ namespace DigitalManualSet.App
             ConfigureServices();
             await DepersistSettings();
 
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
             await ParseOpenOrders();
 
             var mainWindow = new MainWindow
@@ -171,6 +173,12 @@ namespace DigitalManualSet.App
             services.AddSingleton<IAddDocumentDialogService, AddDocumentDialogService>();
 
             services.AddSingleton<IPackageWriter, PackageWriter>();
+            services.AddSingleton<IManifestGenerator, ManifestGenerator>();
+            services.AddSingleton<ICompletionCertificateGenerator, CompletionCertificateGenerator>();
+            services.AddSingleton<ISplashScreenGenerator, SplashScreenGenerator>();
+            services.AddSingleton<IPackageValidator, PackageValidator>();
+            services.AddSingleton<IVolumeRenamer, VolumeRenamer>();
+            services.AddSingleton<IRemovableDriveCleaner, RemovableDriveCleaner>();
 
             services.AddSingleton<IMessageService, MessageService>();
 
@@ -184,7 +192,6 @@ namespace DigitalManualSet.App
             services.AddTransient<CreatePackageViewModel>();
             services.AddTransient<CreateOrderViewModel>();
             services.AddTransient<ProcessDocumentsViewModel>();
-            services.AddTransient<SelectOutputViewModel>();
             services.AddTransient<CompletePackageViewModel>();
 
             services.AddTransient<OpenPackageViewModel>();

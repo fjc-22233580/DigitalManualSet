@@ -57,6 +57,7 @@ public class DocumentValidationService : IDocumentValidationService
             document.IsValidated = true;
             var filePath = matchingFiles[0];
             document.LocalFilePath = filePath;
+            document.Length = fileInfo.Length;
         }
 
         return new DocumentValidationResult(errors.Count == 0, errors);

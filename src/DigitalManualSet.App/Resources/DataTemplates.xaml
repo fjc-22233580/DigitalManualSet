@@ -35,10 +35,6 @@
         <createPackageViews:ProcessDocumentsView />
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type createPackageVM:SelectOutputViewModel}">
-        <createPackageViews:SelectOutputView />
-    </DataTemplate>
-
     <DataTemplate DataType="{x:Type createPackageVM:CompletePackageViewModel}">
         <createPackageViews:CompletePackageView />
     </DataTemplate>

@@ -47,6 +47,16 @@ public class Package
     /// </summary>
     public List<Document>? Documents { get; private set; } = null;
 
+    /// <summary>
+    /// Gets the document count.
+    /// </summary>
+    public int DocumentCount => Documents!.Count;
+
+    /// <summary>
+    /// Gets the total size of all documents in bytes.
+    /// </summary>
+    public long TotalDocumentsSize => Documents!.Sum(doc => doc.Length);
+
     #endregion
 
     #region Methods
