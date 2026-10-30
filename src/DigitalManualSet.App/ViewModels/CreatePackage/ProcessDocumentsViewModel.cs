@@ -40,15 +40,16 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// <param name="appPathProvider">The application path provider.</param>
     /// <param name="documentValidationService">The document validation service.</param>
     /// <param name="addDocumentDialogService">The add document dialog service.</param>
+    /// <param name="messageService">The message service.</param>
     /// <exception cref="System.ArgumentException">Expected a {nameof(CreateOrderStep)}. - step</exception>
-    public ProcessDocumentsViewModel(IWorkflowStep<PackageWorkflowStepId> step,
+    public ProcessDocumentsViewModel(ProcessDocumentsStep step,
         IDocumentDownloadService downloadService,
         IAppPathProvider appPathProvider,
         IDocumentValidationService documentValidationService,
         IAddDocumentDialogService addDocumentDialogService,
         IMessageService messageService)
     {
-        _step = step as ProcessDocumentsStep ?? throw new ArgumentException($"Expected a {nameof(CreateOrderStep)}.", nameof(step));
+        _step = step ?? throw new ArgumentException($"Expected a {nameof(CreateOrderStep)}.", nameof(step));
         _downloadService = downloadService;
         _appPathProvider = appPathProvider;
         _documentValidationService = documentValidationService;

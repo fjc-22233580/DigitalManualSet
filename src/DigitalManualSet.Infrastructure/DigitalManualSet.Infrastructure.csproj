@@ -1,18 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="ExcelDataReader" Version="3.9.0" />
-    <PackageReference Include="System.Management" Version="9.0.5" />
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="QuestPDF" Version="2026.9.1" />
+	    <PackageReference Include="ExcelDataReader" Version="3.9.0" />
+	    <PackageReference Include="System.Management" Version="9.0.5" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DigitalManualSet.Core\DigitalManualSet.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DigitalManualSet.Core\DigitalManualSet.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Assets\Splash\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Assets\Splash\styles.css" />
+		<EmbeddedResource Include="Assets\Splash\app.js" />
+	</ItemGroup>
 
 </Project>

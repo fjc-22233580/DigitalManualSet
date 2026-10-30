@@ -1,0 +1,71 @@
+/* Apply border-box sizing so padding and borders are included within an element's declared width and height. */
+* {
+    box-sizing: border-box;
+}
+
+/* Base page styling. */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    color: #222;
+}
+
+/* Centres the page content and prevents it becoming too wide on large screens. */
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 24px;
+}
+
+/* Adds spacing below the page header. */
+header {
+    margin-bottom: 32px;
+}
+
+/* Reduces the default spacing below the main title. */
+h1 {
+    margin-bottom: 8px;
+}
+
+/* Full-width search box used to filter the document list. */
+#search {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 16px;
+    font-size: 1rem;
+}
+
+/* Styles each document as a horizontal card. The document details sit on the left and the Open link on the right. */
+.document {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    margin-bottom: 8px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+/* Put the filename and document type on separate lines. */
+.document strong,
+.document span {
+    display: block;
+}
+
+/* Secondary styling for the document type. */
+.document span {
+    margin-top: 4px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Style the Open link so it looks more like a button. */
+.document a {
+    padding: 8px 16px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}

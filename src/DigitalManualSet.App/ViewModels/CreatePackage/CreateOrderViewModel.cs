@@ -22,15 +22,12 @@ public class CreateOrderViewModel : ViewModel, IPackageWorkflowStepViewModel
     /// <summary>
     /// Initialises the view model for the supplied package workflow step.
     /// </summary>
-    /// <param name="step">
-    /// The workflow step responsible for storing the selected or manually created order.
-    /// </param>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the supplied workflow step is not a <see cref="CreateOrderStep"/>.
-    /// </exception>
-    public CreateOrderViewModel(IWorkflowStep<PackageWorkflowStepId> step)
+    /// <param name="step">The workflow step responsible for storing the selected or manually created order.</param>
+    /// <exception cref="System.ArgumentException">Expected a {nameof(CreateOrderStep)}. - step</exception>
+    /// <exception cref="ArgumentException">Thrown when the supplied workflow step is not a <see cref="CreateOrderStep" />.</exception>
+    public CreateOrderViewModel(CreateOrderStep step)
     {
-        _step = step as CreateOrderStep ?? throw new ArgumentException($"Expected a {nameof(CreateOrderStep)}.", nameof(step));
+        _step = step ?? throw new ArgumentException($"Expected a {nameof(CreateOrderStep)}.", nameof(step));
 
         OrdersView = CollectionViewSource.GetDefaultView(_step.AvailableOrders);
         OrdersView.Filter = FilterOrder;

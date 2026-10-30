@@ -48,6 +48,11 @@ public class Document
     public string LocalFilePath { get; set; }
 
     /// <summary>
+    /// Gets the size of the document in bytes.
+    /// </summary>
+    public long Length { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the Document class with the specified metadata.
     /// </summary>
     public Document(string documentNumber, string documentName, string revision, string category)

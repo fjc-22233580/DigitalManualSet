@@ -24,6 +24,8 @@ public sealed record RemovableDrive(
     /// </summary>
     public long UsedSpace => TotalSpace - AvailableSpace;
 
+    public string ModelDisplayName => $"{Model} ({RootPath})";
+
     /// <summary>
     /// Gets a display-friendly representation of the drive's write status.
     /// </summary>

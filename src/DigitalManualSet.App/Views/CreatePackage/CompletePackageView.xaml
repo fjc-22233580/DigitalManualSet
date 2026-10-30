@@ -6,19 +6,559 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DigitalManualSet.App.Views.CreatePackage"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:DigitalManualSet.Core.Models;assembly=DigitalManualSet.Core"
     d:DataContext="{d:DesignInstance createPackage:CompletePackageViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid>
 
+
+    <UserControl.Resources>
+
+        <Thickness x:Key="ContainerPadding">12</Thickness>
+
+        <DataTemplate x:Key="DriveWriteStatusBadgeTemplate">
+            <Border
+                x:Name="Badge"
+                Height="32"
+                Padding="6,2"
+                CornerRadius="10">
+
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        x:Name="Icon"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="22"
+                        Text="&#xE9CE;" />
+
+                    <TextBlock
+                        x:Name="Label"
+                        Grid.Column="1"
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center"
+                        FontWeight="Bold"
+                        Text="Unknown" />
+                </Grid>
+            </Border>
+
+            <DataTemplate.Triggers>
+
+                <!--  Writable  -->
+                <DataTrigger Binding="{Binding WriteStatus}" Value="{x:Static models:DriveWriteStatus.Writable}">
+                    <Setter TargetName="Badge" Property="Background" Value="#1fff76" />
+                    <Setter TargetName="Icon" Property="Foreground" Value="#107C10" />
+                    <Setter TargetName="Icon" Property="Text" Value="&#xEC61;" />
+                    <Setter TargetName="Label" Property="Foreground" Value="#107C10" />
+                    <Setter TargetName="Label" Property="Text" Value="Writable" />
+                </DataTrigger>
+
+                <!--  Write protected  -->
+                <DataTrigger Binding="{Binding WriteStatus}" Value="{x:Static models:DriveWriteStatus.WriteProtected}">
+                    <Setter TargetName="Badge" Property="Background" Value="#FDE2E1" />
+                    <Setter TargetName="Icon" Property="Foreground" Value="#C42B1C" />
+                    <Setter TargetName="Icon" Property="Text" Value="&#xEB90;" />
+                    <Setter TargetName="Label" Property="Foreground" Value="#C42B1C" />
+                    <Setter TargetName="Label" Property="Text" Value="Write protected" />
+                </DataTrigger>
+
+                <!--  Unknown  -->
+                <DataTrigger Binding="{Binding WriteStatus}" Value="{x:Static models:DriveWriteStatus.Unknown}">
+                    <Setter TargetName="Badge" Property="Background" Value="#FFF1C7" />
+                    <Setter TargetName="Icon" Property="Foreground" Value="#7A4A00" />
+                    <Setter TargetName="Icon" Property="Text" Value="&#xE814;" />
+                    <Setter TargetName="Label" Property="Foreground" Value="#7A4A00" />
+                    <Setter TargetName="Label" Property="Text" Value="Unknown" />
+                </DataTrigger>
+
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+
+        <DataTemplate x:Key="DriveContentStatusBadgeTemplate">
+            <Border
+                x:Name="Badge"
+                Height="32"
+                Padding="6,2"
+                CornerRadius="10">
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        x:Name="Icon"
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="22" />
+
+                    <TextBlock
+                        x:Name="Label"
+                        Grid.Column="1"
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center"
+                        FontWeight="Bold" />
+                </Grid>
+            </Border>
+
+            <DataTemplate.Triggers>
+
+                <!--  Empty  -->
+                <DataTrigger Binding="{Binding IsEffectivelyEmpty}" Value="True">
+                    <Setter TargetName="Badge" Property="Background" Value="#1fff76" />
+                    <Setter TargetName="Icon" Property="Foreground" Value="#107C10" />
+                    <Setter TargetName="Icon" Property="Text" Value="&#xEC61;" />
+                    <Setter TargetName="Label" Property="Foreground" Value="#107C10" />
+                    <Setter TargetName="Label" Property="Text" Value="Empty" />
+                </DataTrigger>
+
+                <!--  Contains files  -->
+                <DataTrigger Binding="{Binding IsEffectivelyEmpty}" Value="False">
+                    <Setter TargetName="Badge" Property="Background" Value="#FFF1C7" />
+                    <Setter TargetName="Icon" Property="Foreground" Value="#7A4A00" />
+                    <Setter TargetName="Icon" Property="Text" Value="&#xE814;" />
+                    <Setter TargetName="Label" Property="Foreground" Value="#7A4A00" />
+                    <Setter TargetName="Label" Property="Text" Value="Contains files" />
+                </DataTrigger>
+
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Text="{Binding Title}" />
+        <!--  Select USB Container  -->
+        <Grid Grid.Row="0" Margin="0,0,0,8">
+            <Border Padding="{DynamicResource ContainerPadding}" Style="{StaticResource ContainerStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.6*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0">
+
+                        <TextBlock
+                            FontWeight="Bold"
+                            Style="{DynamicResource SubtitleTextBlockStyle}"
+                            Text="1. Select USB" />
+
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                            Style="{StaticResource BodyTextBlockStyle}"
+                            Text="Select the USB drive that will be used for the documentation package." />
+                    </StackPanel>
+
+                    <Grid
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        VerticalAlignment="Top">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
 
+                        <ComboBox
+                            Grid.Column="0"
+                            Margin="0,0,8,0"
+                            DisplayMemberPath="ModelDisplayName"
+                            ItemsSource="{Binding AvailableDrives}"
+                            SelectedItem="{Binding SelectedDrive}" />
+
+                        <Button
+                            Grid.Column="1"
+                            Command="{Binding RefreshDrivesCommand}"
+                            Style="{StaticResource SmallIconButtonStyle}">
+                            <TextBlock
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="18"
+                                Text="&#xEDAB;" />
+                        </Button>
+                    </Grid>
+
+                    <Border
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Margin="0,8,0,0"
+                        Padding="8"
+                        Style="{StaticResource ContainerStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!--  USB Icon  -->
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="12,0,18,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="24"
+                                Text="&#xE88E;" />
+
+                            <StackPanel
+                                Grid.Column="1"
+                                Margin="0,0,0,0"
+                                VerticalAlignment="Center">
+
+                                <TextBlock
+                                    FontSize="16"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding SelectedDrive.Model, Mode=OneWay}"
+                                    TextTrimming="CharacterEllipsis" />
+
+
+                                <Grid HorizontalAlignment="Left">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+
+
+                                    <StackPanel Grid.Column="0" Orientation="Vertical">
+                                        <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Root path:" />
+                                        <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Capacity:" />
+                                    </StackPanel>
+
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Margin="12,0,0,0"
+                                        Orientation="Vertical">
+                                        <TextBlock Text="{Binding SelectedDrive.RootPath, Mode=OneWay}" />
+                                        <TextBlock>
+                                            <Run Text="{Binding SelectedDrive.TotalSpace, Mode=OneWay, Converter={StaticResource BytesToReadableSizeConverter}}" />
+                                            <Run Text=" total" />
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <!--<TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}">
+                                        <Run Text="{Binding SelectedDrive.UsedSpace, Mode=OneWay, Converter={StaticResource BytesToReadableSizeConverter}}" />
+                                        <Run Text=" free" />
+                                    </TextBlock>-->
+                                </Grid>
+
+                            </StackPanel>
+
+                            <ContentControl
+                                Grid.Column="2"
+                                Margin="8,0,0,0"
+                                Content="{Binding SelectedDrive}"
+                                ContentTemplate="{StaticResource DriveWriteStatusBadgeTemplate}" />
+
+
+                            <ContentControl
+                                Grid.Column="3"
+                                Margin="8,0,0,0"
+                                Content="{Binding SelectedDrive}"
+                                ContentTemplate="{StaticResource DriveContentStatusBadgeTemplate}" />
+
+
+                            <Grid Grid.Column="4" Margin="8,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Margin="8,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="24"
+                                    Text="&#xE946;" />
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="0,0,8,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding DriveSummary}"
+                                    TextWrapping="Wrap" />
+
+
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+
+        <!--  Package Information Container  -->
+        <Grid Grid.Row="1">
+            <Border Padding="{DynamicResource ContainerPadding}" Style="{StaticResource ContainerStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0">
+
+                        <TextBlock
+                            FontWeight="Bold"
+                            Style="{DynamicResource SubtitleTextBlockStyle}"
+                            Text="2. Package Information" />
+
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                            Style="{StaticResource BodyTextBlockStyle}"
+                            Text="Details about the documentation package to be created." />
+                    </StackPanel>
+
+
+                    <Grid
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Order Number:" />
+                            <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Customer:" />
+                            <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="System:" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{Binding Order.OrderNumber}" />
+                            <TextBlock Text="{Binding Order.CustomerName}" />
+                            <TextBlock Text="{Binding Order.SystemId}" />
+                        </StackPanel>
+
+                    </Grid>
+
+                    <Grid
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="8,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Document Count:" />
+                            <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Estimated Size:" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{Binding DocumentCount}" />
+                            <TextBlock Text="{Binding TotalDocumentsSize, Converter={StaticResource BytesToReadableSizeConverter}}" />
+                        </StackPanel>
+
+                    </Grid>
+
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!--  Create USB Package Container  -->
+        <Border
+            Grid.Row="2"
+            Margin="0,8,0,0"
+            Padding="{DynamicResource ContainerPadding}"
+            Style="{StaticResource ContainerStyle}">
+
+            <Grid ShowGridLines="False">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0">
+
+                    <TextBlock
+                        FontWeight="Bold"
+                        Style="{DynamicResource SubtitleTextBlockStyle}"
+                        Text="3. Create USB Package" />
+
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Text="This will copy the documents, generate the manifest, splash screen, completion certificate, validate the package, and rename the USB." />
+                </StackPanel>
+
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Command="{Binding CreatePackageCommand}"
+                    Content="Create Package"
+                    Style="{DynamicResource AccentButtonStyle}" />
+
+                <!--  Progress bar container  -->
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="0,10,0,0"
+                    Padding="{StaticResource ContainerPadding}"
+                    Style="{StaticResource ContainerStyle}">
+
+                    <Grid Margin="0,0" VerticalAlignment="Center">
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="50" />
+                        </Grid.ColumnDefinitions>
+
+                        <ProgressBar
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Height="12"
+                            Maximum="100"
+                            Minimum="0"
+                            Style="{StaticResource RoundedFluentProgressBar}"
+                            Value="{Binding PackageProgress, Mode=OneWay}" />
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="12,0,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            FontWeight="SemiBold">
+                            <Run Text="{Binding PackageProgress, StringFormat={}{0:0}}" />
+                            <Run Text="%" />
+                        </TextBlock>
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            Margin="0,8,0,0"
+                            HorizontalAlignment="Center"
+                            FontWeight="SemiBold"
+                            Text="{Binding PackageStatus}" />
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            HorizontalAlignment="Center"
+                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                            Text="{Binding PackageDetail}" />
+                    </Grid>
+                </Border>
+
+
+                <!--  Package Summary  -->
+                <Border
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="0,8,0,0"
+                    Padding="{DynamicResource ContainerPadding}"
+                    Style="{StaticResource ContainerStyle}">
+
+                    <Grid>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            FontWeight="Bold"
+                            Style="{DynamicResource SubtitleTextBlockStyle}"
+                            Text="Package Summary" />
+
+                        <Grid  Grid.Column="0" Grid.Row="1" Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+
+                            </Grid.ColumnDefinitions>
+
+
+                            <StackPanel Grid.Column="0">
+
+                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Documents copied:" />
+                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Manifest:" />
+                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Splash screen:" />
+                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Certificate:" />
+                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Validation:" />
+                                <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="USB Label:" />
+
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" >
+
+                                <TextBlock Text="{Binding DocumentsSummary}" />
+                                <TextBlock Text="{Binding ManifestSummary}" />
+                                <TextBlock Text="{Binding SplashScreenSummary}" />
+                                <TextBlock Text="{Binding CertificateSummary}" />
+                                <TextBlock Text="{Binding ValidationSummary}" />
+                                <TextBlock Text="{Binding UsbLabelSummary}" />
+
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

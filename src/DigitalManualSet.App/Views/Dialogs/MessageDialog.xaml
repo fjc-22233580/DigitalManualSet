@@ -51,7 +51,7 @@
                 </Grid.RowDefinitions>
 
 
-                <TextBlock Grid.Row="0" Text="{Binding Message, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                <TextBlock Grid.Row="0" TextWrapping="Wrap" Text="{Binding Message, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
 
                 <DockPanel Grid.Row="1" HorizontalAlignment="Right">
 

@@ -61,11 +61,7 @@
 
         <Border
             Grid.Row="1"
-            Margin="4"
-            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{DynamicResource ExpanderHeaderBorderBrush}"
-            BorderThickness="{StaticResource ExpanderBorderThemeThickness}"
-            CornerRadius="{StaticResource OverlayCornerRadius}">
+            Margin="4">
 
             <ContentControl Content="{Binding CurrentScreen.ViewModel}" />
         </Border>

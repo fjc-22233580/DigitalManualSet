@@ -16,21 +16,23 @@ public sealed class PackageWriter : IPackageWriter
     private const string OtherDirectoryName = "Other";
 
     /// <summary>
-    /// Writes all package documents to the destination drive and reports copy progress.
+    /// Writes all package documents to the destination drive and reports package creation progress.
     /// </summary>
     /// <param name="package">The package whose documents will be copied.</param>
     /// <param name="destination">The removable drive that will receive the documents.</param>
-    /// <param name="progress">An optional progress reporter for the copy operation.</param>
+    /// <param name="progress">An optional progress reporter for the package creation operation.</param>
     /// <param name="cancellationToken">A token that can cancel the copy operation.</param>
     /// <returns>A task that represents the asynchronous write operation.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="package"/> or <paramref name="destination"/> is <see langword="null"/>.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the destination drive is not writable or is not empty.</exception>
-    /// <exception cref="IOException">Thrown when the destination drive does not have enough available space.</exception>
-    public async Task WriteDocumentsAsync(
-        Package package,
-        RemovableDrive destination,
-        IProgress<PackageWriteProgress>? progress = null,
-        CancellationToken cancellationToken = default)
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="package"/> or <paramref name="destination"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the destination drive is not writable or is not empty.
+    /// </exception>
+    /// <exception cref="IOException">
+    /// Thrown when the destination drive does not have enough available space.
+    /// </exception>
+    public async Task WriteDocumentsAsync(Package package, RemovableDrive destination, IProgress<PackageCreationProgress>? progress = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(package);
         ArgumentNullException.ThrowIfNull(destination);
@@ -48,20 +50,35 @@ public sealed class PackageWriter : IPackageWriter
             cancellationToken.ThrowIfCancellationRequested();
 
             var document = package.Documents[i];
+            var fileName = Path.GetFileName(document.LocalFilePath);
 
-            progress?.Report(new PackageWriteProgress(
-                CurrentFile: i + 1,
-                TotalFiles: totalFiles,
-                FileName: Path.GetFileName(document.LocalFilePath)));
+            // Report the file currently being copied.
+            progress?.Report(new PackageCreationProgress(
+                Stage: PackageCreationStage.CopyDocuments,
+                CurrentStep: 1,
+                TotalSteps: 6,
+                Status: $"Copying {i + 1}/{totalFiles} files...",
+                StageProgress: totalFiles == 0 ? 0 : (double)i / totalFiles,
+                Detail: fileName));
 
-            var relativePath = Path.Combine(DocumentsDirectoryName, GetDirectoryName(document.Type), Path.GetFileName(document.LocalFilePath));
+            var relativePath = Path.Combine(DocumentsDirectoryName, GetDirectoryName(document.Type), fileName);
 
             var targetPath = Path.Combine(destination.RootPath, relativePath);
 
             await CopyFileAsync(document.LocalFilePath, targetPath, cancellationToken);
 
+            await Task.Delay(500, cancellationToken);
+
             document.OutputRelativePath = relativePath;
         }
+
+        // Copy stage is now fully complete.
+        progress?.Report(new PackageCreationProgress(
+            Stage: PackageCreationStage.CopyDocuments,
+            CurrentStep: 1,
+            TotalSteps: 6,
+            Status: $"Copied {totalFiles}/{totalFiles} files.",
+            StageProgress: 1));
     }
 
     /// <summary>
@@ -78,7 +95,11 @@ public sealed class PackageWriter : IPackageWriter
             throw new InvalidOperationException("The selected USB drive is not writable.");
         }
 
-        if (destination.IsEffectivelyEmpty == false)
+        // Re-check the actual drive contents rather than relying on the
+        // IsEffectivelyEmpty value captured when the drive was discovered.
+        var isEffectivelyEmpty = IsEffectivelyEmpty(destination.RootPath);
+
+        if (!isEffectivelyEmpty)
         {
             throw new InvalidOperationException("The selected USB drive is not empty.");
         }
@@ -89,6 +110,23 @@ public sealed class PackageWriter : IPackageWriter
         {
             throw new IOException("The selected USB drive does not have enough available space.");
         }
+    }
+
+    /// <summary>
+    /// Determines whether the destination USB contains files or not.
+    /// </summary>
+    /// <param name="rootPath">The root path.</param>
+   
+    private static bool IsEffectivelyEmpty(string rootPath)
+    {
+        var ignoredEntries = new HashSet<string>(
+            StringComparer.OrdinalIgnoreCase)
+        {
+            "System Volume Information",
+            "$RECYCLE.BIN"
+        };
+
+        return !Directory.EnumerateFileSystemEntries(rootPath).Any(path => !ignoredEntries.Contains(Path.GetFileName(path)));
     }
 
     /// <summary>
