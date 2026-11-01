@@ -13,6 +13,7 @@ public sealed class SplashScreenGenerator : ISplashScreenGenerator
     // Embedded resources stored within the Infrastructure assembly.
     private const string StylesResource = "DigitalManualSet.Infrastructure.Assets.Splash.styles.css";
     private const string ScriptResource = "DigitalManualSet.Infrastructure.Assets.Splash.app.js";
+    private const string LogoResource = "DigitalManualSet.Infrastructure.Assets.Splash.company-logo.svg";
 
     /// <summary>
     /// Creates the splash screen structure within the package output.
@@ -28,98 +29,148 @@ public sealed class SplashScreenGenerator : ISplashScreenGenerator
 
         var rootPath = package.Output.RootPath;
 
-        // Create the folder structure used by the splash screen.
         var cssDirectory = Path.Combine(rootPath, "assets", "css");
         var jsDirectory = Path.Combine(rootPath, "assets", "js");
+        var imageDirectory = Path.Combine(rootPath, "assets", "images");
 
         Directory.CreateDirectory(cssDirectory);
         Directory.CreateDirectory(jsDirectory);
+        Directory.CreateDirectory(imageDirectory);
 
-        // Copy the static CSS and JavaScript resources from the application assembly onto the USB.
         await CopyEmbeddedResourceAsync(StylesResource, Path.Combine(cssDirectory, "styles.css"), cancellationToken);
         await CopyEmbeddedResourceAsync(ScriptResource, Path.Combine(jsDirectory, "app.js"), cancellationToken);
-
-        // Generate the dynamic HTML page using the current package contents.
+        await CopyEmbeddedResourceAsync(LogoResource, Path.Combine(imageDirectory, "company-logo.svg"), cancellationToken);
         await GenerateIndexAsync(package, cancellationToken);
     }
+
 
     /// <summary>
     /// Generates index.html and embeds the package document data into the page.
     /// </summary>
-    private static async Task GenerateIndexAsync(Package package, CancellationToken cancellationToken)
+
+    private static async Task GenerateIndexAsync(
+        Package package,
+        CancellationToken cancellationToken)
     {
-        // Build the simplified document data required by the splash screen.
-        // OutputRelativePath points to the actual file copied to the USB.
-        var documents = package.Documents.Select(document =>
-            new
+        // Only include documents with an output path.
+        var documents = package.Documents
+            .Where(d => !string.IsNullOrWhiteSpace(d.OutputRelativePath))
+            .Select(document => new
             {
-                fileName = Path.GetFileName(document.LocalFilePath),
+                number = document.DocumentNumber,
+                name = document.DocumentName,
+                revision = document.Revision,
                 type = document.Type.ToString(),
-                path = document.OutputRelativePath?.Replace('\\', '/')
-            });
+                fileName = Path.GetFileName(document.OutputRelativePath!),
+                path = document.OutputRelativePath!.Replace('\\', '/')
+            })
+            .ToArray();
 
         var packageData = new
         {
+            order = new
+            {
+                number = package.Order?.OrderNumber ?? "",
+                customer = package.Order?.CustomerName ?? "",
+                systemId = package.Order?.SystemId ?? ""
+            },
+
+            generatedOn = DateTimeOffset.Now.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture),
             documents
         };
 
-        // Serialise the document data so JavaScript can use it without
-        // needing to fetch Manifest.json from a local file:// URL.
-        var json = JsonSerializer.Serialize(packageData,
-            new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
+        var json = JsonSerializer.Serialize(packageData);
 
-        // Prevent a filename containing </script> from accidentally terminating the embedded script block.
         json = json.Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
 
-        // Raw interpolated string allows the generated JSON to be inserted directly into the HTML without extensive escaping.
         var html = $$"""
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
 
-                <title>Digital Documentation</title>
+            <title>Digital Documentation</title>
 
-                <link rel="stylesheet" href="assets/css/styles.css">
-            </head>
+            <link rel="stylesheet" href="assets/css/styles.css">
+        </head>
 
-            <body>
-                <main class="container">
+        <body>
+            <main class="container">
 
-                    <header>
-                        <h1>Digital Documentation</h1>
-                        <p>Documentation supplied with this machine.</p>
-                    </header>
+                <header class="page-header">
+                    <img
+                        class="company-logo"
+                        src="assets/images/company-logo.svg"
+                        alt="Instron logo">
 
-                    <section>
-                        <input
-                            id="search"
-                            type="search"
-                            placeholder="Search documentation...">
+                    <h1>Digital Documentation</h1>
+                    <p>Documentation supplied with your equipment.</p>
+                </header>
 
-                        <p id="document-count"></p>
+                <section class="order-summary">
+                    <h2>Order Information</h2>
 
-                        <div id="document-list"></div>
-                    </section>
+                    <div class="order-details">
+                        <div>
+                            <span>Order Number</span>
+                            <strong id="order-number"></strong>
+                        </div>
 
-                </main>
+                        <div>
+                            <span>Customer</span>
+                            <strong id="customer-name"></strong>
+                        </div>
 
-                <script>
-                    window.packageData = {{json}};
-                </script>
+                        <div>
+                            <span>System ID</span>
+                            <strong id="system-id"></strong>
+                        </div>
 
-                <script src="assets/js/app.js"></script>
-            </body>
-            </html>
-            """;
+                        <div>
+                            <span>Generated</span>
+                            <strong id="generated-on"></strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="documents-section">
+                    <div class="section-heading">
+                        <h2>Documents</h2>
+                        <span id="document-count"></span>
+                    </div>
+
+                    <input
+                        id="search"
+                        type="search"
+                        aria-label="Search documentation"
+                        placeholder="Search by number, name or type...">
+
+                    <div id="document-list"></div>
+                </section>
+
+                <footer>
+                    <p>
+                        This documentation package is available offline.
+                        Select Open to view a document.
+                    </p>
+                </footer>
+
+            </main>
+
+            <script>
+                window.packageData = {{json}};
+            </script>
+
+            <script src="assets/js/app.js"></script>
+        </body>
+        </html>
+        """;
 
         var outputPath = Path.Combine(package.Output!.RootPath, "index.html");
         await File.WriteAllTextAsync(outputPath, html, cancellationToken);
     }
+
 
     /// <summary>
     /// Copies an embedded assembly resource to the requested output path.

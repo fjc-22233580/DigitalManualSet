@@ -1,71 +1,297 @@
-/* Apply border-box sizing so padding and borders are included within an element's declared width and height. */
+
+/*
+ * Digital Documentation Splash Screen
+ *
+ * Defines the appearance of the customer-facing documentation page.
+ * Uses standard CSS without external dependencies so the page can
+ * operate entirely offline from the generated USB package.
+ */
+
+/* --------------------------------------------------
+   Global Styles
+   -------------------------------------------------- */
+
+/* Define the default font, foreground colour and page background. */
+:root {
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #243244;
+    background: #f4f6f9;
+}
+
+/* Include padding and borders within an element's specified dimensions. */
 * {
     box-sizing: border-box;
 }
 
-/* Base page styling. */
+/* Remove the browser's default page margin. */
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-    color: #222;
 }
 
-/* Centres the page content and prevents it becoming too wide on large screens. */
+/* Centre the page content and restrict its maximum width. */
 .container {
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 40px 24px;
+    padding: 32px 24px;
 }
 
-/* Adds spacing below the page header. */
-header {
-    margin-bottom: 32px;
+/* --------------------------------------------------
+   Page Header
+   -------------------------------------------------- */
+
+/* Display the company branding and page introduction in a card. */
+.page-header {
+    background: white;
+    padding: 32px;
+    border: 1px solid #e3e7ec;
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
-/* Reduces the default spacing below the main title. */
+/* Maintain the company logo's aspect ratio within defined size limits. */
+.company-logo {
+    display: block;
+    max-width: 200px;
+    max-height: 65px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: left;
+    margin-bottom: 24px;
+}
+
+/* Primary page heading. */
 h1 {
-    margin-bottom: 8px;
+    font-size: 28px;
+    margin: 0 0 8px;
 }
 
-/* Full-width search box used to filter the document list. */
+/* Shared styling for section headings. */
+h2 {
+    font-size: 18px;
+    margin: 0;
+}
+
+/* Secondary descriptive text beneath the page heading. */
+.page-header p {
+    color: #697586;
+    margin: 0;
+}
+
+/* --------------------------------------------------
+   Order Information
+   -------------------------------------------------- */
+
+/* Shared card styling for the order summary and document list. */
+.order-summary,
+.documents-section {
+    background: white;
+    border: 1px solid #e3e7ec;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+/* Arrange order metadata into four equally sized columns. */
+.order-details {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 22px;
+}
+
+    /* Stack each metadata label above its corresponding value. */
+    .order-details div {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 6px;
+    }
+
+    /* Display order field labels using smaller, secondary text. */
+    .order-details span {
+        color: #748091;
+        font-size: 12px;
+    }
+
+    /* Display order values prominently and wrap long values if necessary. */
+    .order-details strong {
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }
+
+/* --------------------------------------------------
+   Document Section
+   -------------------------------------------------- */
+
+/* Position the document heading and document count on opposite sides. */
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+/* Style the counter showing the number of matching documents. */
+#document-count {
+    color: #697586;
+    font-size: 13px;
+}
+
+/* Provide a full-width search input above the document list. */
 #search {
+    display: block;
     width: 100%;
-    padding: 12px;
-    margin-bottom: 16px;
-    font-size: 1rem;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    border: 1px solid #cdd5df;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 14px;
 }
 
-/* Styles each document as a horizontal card. The document details sit on the left and the Open link on the right. */
+    /* Highlight the search field when it receives keyboard or mouse focus. */
+    #search:focus {
+        outline: 2px solid #275a93;
+        outline-offset: 1px;
+    }
+
+/* --------------------------------------------------
+   Document Rows
+   -------------------------------------------------- */
+
+/* Arrange document information and its Open link horizontally.
+ * Separate consecutive documents using a subtle bottom border.
+ */
 .document {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px;
-    margin-bottom: 8px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    gap: 24px;
+    padding: 16px 4px;
+    border-bottom: 1px solid #edf0f4;
 }
 
-/* Put the filename and document type on separate lines. */
-.document strong,
-.document span {
-    display: block;
+    /* Remove the divider beneath the final document. */
+    .document:last-child {
+        border-bottom: none;
+    }
+
+/* Stack the document name, metadata and filename vertically. */
+.document-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
 }
 
-/* Secondary styling for the document type. */
-.document span {
-    margin-top: 4px;
-    color: #666;
-    font-size: 0.9rem;
+/* Display the descriptive document name as the primary row label. */
+.document-title {
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
 }
 
-/* Style the Open link so it looks more like a button. */
+/* Display document number, revision and type as secondary information. */
+.document-metadata {
+    color: #68778a;
+    font-size: 12px;
+}
+
+/* Display the physical filename using smaller, less prominent text. */
+.document-filename {
+    color: #8a95a4;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+/* Style document hyperlinks as buttons.
+ * Prevent the links from shrinking when document names are long.
+ */
 .document a {
-    padding: 8px 16px;
+    display: inline-block;
+    flex-shrink: 0;
+    color: white;
+    background: #275a93;
     text-decoration: none;
-    color: inherit;
-    border: 1px solid #aaa;
-    border-radius: 4px;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+    /* Darken the Open button when the pointer is over it. */
+    .document a:hover {
+        background: #1c4778;
+    }
+
+    /* Provide a visible focus indicator for keyboard navigation. */
+    .document a:focus-visible {
+        outline: 2px solid #275a93;
+        outline-offset: 3px;
+    }
+
+/* Display a centred message when no documents match the search. */
+.empty-message {
+    text-align: center;
+    color: #697586;
+    padding: 30px;
+}
+
+/* --------------------------------------------------
+   Footer
+   -------------------------------------------------- */
+
+/* Display supplementary information beneath the main content. */
+footer {
+    color: #748091;
+    font-size: 12px;
+    text-align: center;
+    padding: 12px;
+}
+
+/* --------------------------------------------------
+   Responsive Layout - Tablets and Smaller Screens
+   -------------------------------------------------- */
+
+/* Reduce outer spacing and use two columns for order details
+ * when the available screen width is 700px or less.
+ */
+@media (max-width: 700px) {
+    .container {
+        padding: 16px;
+    }
+
+    .page-header,
+    .order-summary,
+    .documents-section {
+        padding: 20px;
+    }
+
+    .order-details {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .document {
+        gap: 12px;
+    }
+}
+
+/* --------------------------------------------------
+   Responsive Layout - Narrow Mobile Screens
+   -------------------------------------------------- */
+
+/* Display order information in a single column and stack
+ * document details above the Open link on narrow screens.
+ */
+@media (max-width: 420px) {
+    .order-details {
+        grid-template-columns: 1fr;
+    }
+
+    .document {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
