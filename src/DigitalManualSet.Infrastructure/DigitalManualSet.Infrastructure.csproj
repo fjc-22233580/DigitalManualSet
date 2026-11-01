@@ -5,6 +5,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Assets\Splash\company-logo.svg" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="QuestPDF" Version="2026.9.1" />
 	    <PackageReference Include="ExcelDataReader" Version="3.9.0" />
@@ -16,10 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Assets\Splash\" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<EmbeddedResource Include="Assets\Splash\company-logo.svg" />
 		<EmbeddedResource Include="Assets\Splash\styles.css" />
 		<EmbeddedResource Include="Assets\Splash\app.js" />
 	</ItemGroup>
