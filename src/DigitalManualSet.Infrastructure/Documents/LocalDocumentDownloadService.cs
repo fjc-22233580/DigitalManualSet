@@ -19,10 +19,10 @@ public class LocalDocumentDownloadService : IDocumentDownloadService
     {
         _sourceDirectory = sourceDirectory;
 
-        CreateTestFiles();
     }
 
     /// <summary>
+    /// Debugging only.
     /// Creates dummy test document files if they don't already exist.
     /// </summary>
     private void CreateTestFiles()
@@ -70,7 +70,7 @@ public class LocalDocumentDownloadService : IDocumentDownloadService
         {
             progress?.Report("Finding document...");
 
-            var delay = Random.Shared.Next(1750, 2500);
+            var delay = Random.Shared.Next(1000, 1500);
             await Task.Delay(delay);
 
             Directory.CreateDirectory(destinationDirectory);
@@ -84,7 +84,7 @@ public class LocalDocumentDownloadService : IDocumentDownloadService
                 return new DocumentDownloadResult(
                     false,
                     null,
-                    $"Document '{document.DocumentName}' could not be found.");
+                    $"File not found.");
             }
 
             progress?.Report("Copying document...");

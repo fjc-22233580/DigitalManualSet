@@ -8,7 +8,7 @@
     d:DataContext="{d:DesignInstance createPackage:DocumentRowViewModel}"
     mc:Ignorable="d">
 
-    <Border Height="38" Style="{StaticResource ContainerStyle}">
+    <Border Height="38" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}">
 
 
         <Grid Margin="12,0,0,0" VerticalAlignment="Center">
@@ -17,7 +17,8 @@
                 <ColumnDefinition Width="Auto" SharedSizeGroup="DocNumberColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="NameColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="RevisionColumn" />
-                <ColumnDefinition Width="Auto" SharedSizeGroup="CategoryColumn" />
+                <ColumnDefinition Width="Auto" SharedSizeGroup="TypeColumn" />
+                <ColumnDefinition Width="Auto" SharedSizeGroup="RegisterStatusColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="StatusColumn" />
                 <ColumnDefinition Width="Auto" SharedSizeGroup="DeleteColumn" />
             </Grid.ColumnDefinitions>
@@ -48,16 +49,22 @@
                 Grid.Column="4"
                 Margin="12,0,0,0"
                 VerticalAlignment="Center"
-                Text="{Binding Category}" />
+                Text="{Binding Type}" />
 
             <TextBlock
                 Grid.Column="5"
                 Margin="12,0,0,0"
                 VerticalAlignment="Center"
+                Text="{Binding RegisterStatus}" />
+
+            <TextBlock
+                Grid.Column="6"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center"
                 Text="{Binding Status}" />
 
             <Button
-                Grid.Column="6"
+                Grid.Column="7"
                 Width="28"
                 Height="28"
                 Margin="12,0,0,0"

@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using System.IO;
 using System.Windows;
+using DigitalManualSet.Infrastructure;
 
 namespace DigitalManualSet.App
 {
@@ -163,6 +164,10 @@ namespace DigitalManualSet.App
                     return new CsvDocumentProvider(filePath);
                 });
 
+            services.AddSingleton<IDocumentRegisterProvider>(_ => new CsvDocumentRegisterProvider(_appPathProvider.MasterDocumentListFilePath));
+
+            services.AddSingleton<IDocumentRegisterValidator, DocumentRegisterValidator>();
+
             services.AddSingleton<IRemovableDriveService, RemovableDriveService>();
 
             services.AddSingleton<IDocumentDownloadService>(_ => new LocalDocumentDownloadService(_appPathProvider.TestDocuments));
@@ -179,6 +184,8 @@ namespace DigitalManualSet.App
             services.AddSingleton<IPackageValidator, PackageValidator>();
             services.AddSingleton<IVolumeRenamer, VolumeRenamer>();
             services.AddSingleton<IRemovableDriveCleaner, RemovableDriveCleaner>();
+
+            services.AddTransient<IOrderImportOrchestrator, OrderImportOrchestrator>();
 
             services.AddSingleton<IMessageService, MessageService>();
 

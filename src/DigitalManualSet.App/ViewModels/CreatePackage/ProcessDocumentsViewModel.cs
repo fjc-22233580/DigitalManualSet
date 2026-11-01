@@ -5,9 +5,9 @@ using DigitalManualSet.App.ViewModels.CreatePackage.Interfaces;
 using DigitalManualSet.Core.Common;
 using DigitalManualSet.Core.Documents;
 using DigitalManualSet.Core.PackageCreation.Workflow;
-using DigitalManualSet.Core.Workflow;
 using System.IO;
 using DigitalManualSet.App.Services.Interfaces;
+using Microsoft.Win32;
 
 namespace DigitalManualSet.App.ViewModels.CreatePackage;
 
@@ -17,16 +17,18 @@ namespace DigitalManualSet.App.ViewModels.CreatePackage;
 public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewModel
 {
     #region Fields
-
     private readonly IDocumentDownloadService _downloadService;
     private readonly IAppPathProvider _appPathProvider;
     private readonly IDocumentValidationService _documentValidationService;
     private readonly IAddDocumentDialogService _addDocumentDialogService;
     private readonly IMessageService _messageService;
+    private readonly IOrderImportOrchestrator _orderImportOrchestrator;
     private readonly ProcessDocumentsStep _step;
     private DocumentValidationResult? _validationResult;
     private bool _isDownloading;
     private int _completedDocumentsCount;
+    private List<Document> _workingDocuments = [];
+    private List<string> _documentSourceFiles = [];
 
     #endregion
 
@@ -47,7 +49,8 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         IAppPathProvider appPathProvider,
         IDocumentValidationService documentValidationService,
         IAddDocumentDialogService addDocumentDialogService,
-        IMessageService messageService)
+        IMessageService messageService,
+        IOrderImportOrchestrator orderImportOrchestrator)
     {
         _step = step ?? throw new ArgumentException($"Expected a {nameof(CreateOrderStep)}.", nameof(step));
         _downloadService = downloadService;
@@ -55,35 +58,35 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         _documentValidationService = documentValidationService;
         _addDocumentDialogService = addDocumentDialogService;
         _messageService = messageService;
-
-        OpenDestinationFolder = new RelayCommand(() =>
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = DestinationFolder,
-                UseShellExecute = true
-            });
-        });
+        _orderImportOrchestrator = orderImportOrchestrator;
 
         _step.SetWorkingFolder(_appPathProvider.DocumentsFolder);
         Directory.CreateDirectory(DestinationFolder);
 
-        DocumentCount = _step.AvailableDocuments.Count;
-
-        BeginDownloadCommand = new RelayCommand(Download);
-        AddDocumentCommand = new RelayCommand(AddDocument);
-
-        int rowNumber = 1;
-        foreach (var document in _step.AvailableDocuments)
-        {
-            AvailableDocuments.Add(new DocumentRowViewModel(rowNumber, document, _downloadService, DestinationFolder));
-            rowNumber++;
-        }
+        CreateCommands();
     }
 
     #endregion
 
     #region Properties
+
+    /// <summary>
+    /// True if we're currently running an import.
+    /// </summary>
+    public bool IsImportRunning
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
+
+    /// <summary>
+    /// Gets the import status string which is shown in the UI.
+    /// </summary>
+    public string ImportStatus
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = "Awaiting documents";
 
     /// <summary>
     /// Gets or sets the overall download progress as a percentage (0-100).
@@ -94,14 +97,14 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         set => SetProperty(ref field, value);
     }
 
+    public bool AnyItemsObsolete => _workingDocuments.Any(doc => doc.IsObsolete);
+
     /// <summary>
     /// Gets or sets the total count of documents to download.
     /// </summary>
-    public int DocumentCount
-    {
-        get;
-        set => SetProperty(ref field, value);
-    }
+    public int DocumentCount => _workingDocuments.Count;
+
+    public int FilesCount => _documentSourceFiles.Count;
 
     /// <summary>
     /// Gets a formatted string showing download progress and validation status.
@@ -110,21 +113,7 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         $"{_completedDocumentsCount} / {DocumentCount}"
         + (_isDownloading ? " downloading" : " downloaded")
         + (_validationResult?.IsValid == true ? " and validated" : "");
-
-    /// <summary>
-    /// Gets the command to begin downloading all documents.
-    /// </summary>
-    public RelayCommand BeginDownloadCommand { get; }
-
-    /// <summary>
-    /// Gets the command to add a custom document.
-    /// </summary>
-    public RelayCommand AddDocumentCommand { get; }
-
-    /// <summary>
-    /// Gets the command to open the destination folder in the file explorer.
-    /// </summary>
-    public RelayCommand OpenDestinationFolder { get; }
+   
 
     /// <summary>
     /// Gets the destination folder path where documents are downloaded.
@@ -135,11 +124,6 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// Gets the collection of documents available for download.
     /// </summary>
     public ObservableCollection<DocumentRowViewModel> AvailableDocuments { get; } = new();
-
-    /// <summary>
-    /// Gets the filename associated with the documents.
-    /// </summary>
-    public string DocumentsFilename => _step.DocumentsFilename;
 
     /// <summary>
     /// Gets a value indicating whether any of the documents are manually added.
@@ -153,14 +137,56 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
 
     #endregion
 
-    #region Methods
+    #region Commands
 
     /// <summary>
-    /// Executes the download process asynchronously.
+    /// Gets the import documents command.
     /// </summary>
-    private void Download()
+    public AsyncRelayCommand ImportDocumentsCommand { get; private set; }
+
+    /// <summary>
+    /// Gets the command to begin downloading all documents.
+    /// </summary>
+    public AsyncRelayCommand BeginDownloadCommand { get; private set; }
+
+    /// <summary>
+    /// Gets the command to add a custom document.
+    /// </summary>
+    public RelayCommand AddDocumentCommand { get; private set; }
+
+    /// <summary>
+    /// Gets the command to open the destination folder in the file explorer.
+    /// </summary>
+    public RelayCommand OpenDestinationFolder { get; private set; }
+
+    /// <summary>
+    /// Creates the various ICommands for this VM.
+    /// </summary>
+    private void CreateCommands()
     {
-        _ = DownloadAllAsync();
+        OpenDestinationFolder = new RelayCommand(() =>
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = DestinationFolder,
+                UseShellExecute = true
+            });
+        });
+
+        BeginDownloadCommand = new AsyncRelayCommand(DownloadAllAsync);
+        AddDocumentCommand = new RelayCommand(AddDocument, CanAddDocuments);
+        ImportDocumentsCommand = new AsyncRelayCommand(ImportOrderFilesAsync, CanAddDocuments);
+    }
+
+
+    #endregion
+
+    #region Methods
+
+
+    private bool CanAddDocuments()
+    {
+        return _isDownloading == false;
     }
 
     /// <summary>
@@ -175,7 +201,6 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
             return;
         }
 
-        
         int count = AvailableDocuments.Count;
         var vm = new DocumentRowViewModel(++count, result, _downloadService, DestinationFolder, isManuallyAdded: true, _messageService);
         vm.DeleteRequested += CustomDocument_DeleteRequested;
@@ -188,34 +213,135 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// </summary>
     private async Task DownloadAllAsync()
     {
+        // Update UI
         _isDownloading = true;
+        ImportDocumentsCommand.RaiseCanExecuteChanged();
+        AddDocumentCommand.RaiseCanExecuteChanged();
         _validationResult = null;
         _completedDocumentsCount = 0;
         OverallProgress = 0;
-        DocumentCount = _step.AvailableDocuments.Count;
         OnPropertyChanged(nameof(DownloadStatus));
 
+        // Create downloading tasks
         var tasks = AvailableDocuments.Select(async document =>
         {
-            await document.DownloadAsync();
+            var success = await document.DownloadAsync();
 
-            _completedDocumentsCount++;
+            // Flag if document wasn't found.
+            if (success)
+            {
+                _completedDocumentsCount++;
+            }
 
+            // Update UI
             OverallProgress = (double)_completedDocumentsCount / DocumentCount * 100;
-
             OnPropertyChanged(nameof(DownloadStatus));
         });
 
+        // Carry out the downloading tasks
         await Task.WhenAll(tasks);
 
-
+        // Update UI
         _isDownloading = false;
+        ImportDocumentsCommand.RaiseCanExecuteChanged();
+        AddDocumentCommand.RaiseCanExecuteChanged();
 
+        // Carry out validation
+        _validationResult = _documentValidationService.Validate(_workingDocuments, DestinationFolder);
+        if (_validationResult.IsValid)
+        {
+            _step.UpdateValidationState(_workingDocuments);
+        }
 
-        _validationResult = _documentValidationService.Validate(_step.AvailableDocuments, DestinationFolder);
-        _step.UpdateValidationState();
-
+        // Update UI
         OnPropertyChanged(nameof(DownloadStatus));
+        OnPropertyChanged(nameof(DocumentCount));
+    }
+
+    /// <summary>
+    /// Imports the order files asynchronous.
+    /// </summary>
+    private async Task ImportOrderFilesAsync()
+    {
+
+        // Ask user to pick the files
+        var dialog = new OpenFileDialog
+        {
+            Title = "Select ERP Order Exports",
+            Filter = "CSV Files (*.csv)|*.csv",
+            Multiselect = true,
+            CheckFileExists = true
+        };
+
+        // Only procced if they have chosen something
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        // Check we have new files - we cache them so we can check if come here again.
+        var newItems = dialog.FileNames.Except(_documentSourceFiles, StringComparer.OrdinalIgnoreCase).ToList();
+        if (newItems.Count == 0)
+        {
+            return;
+        }
+        
+        IReadOnlyList<Document> processedDocuments = null;
+
+        try
+        {
+            // Update UI
+            IsImportRunning = true;
+            ImportStatus = "Processing documents";
+
+            // Carry out the import async.
+            processedDocuments = await _orderImportOrchestrator.ImportAsync(newItems);
+            IsImportRunning = false;
+        }
+        catch (NotSupportedException e)
+        {
+            ImportStatus = $"Operation failed: {e.Message}";
+        }
+        catch (InvalidDataException e)
+        {
+            ImportStatus = $"Operation failed: {e.Message}";
+        }
+        catch (OperationCanceledException e)
+        {
+            ImportStatus = $"Operation was cancelled ({e.Message})";
+        }
+        catch (Exception e)
+        {
+            ImportStatus = $"Unknown error encountered: ({e.Message})";
+        }
+        finally
+        {
+            IsImportRunning = false;
+        }
+
+        // Check we parsed something
+        if (processedDocuments is null)
+        {
+            return;
+        }
+
+        // All seems okay, proceed.
+
+        // Cache the user selected files
+        _documentSourceFiles.AddRange(newItems);
+
+        // Find unique items - prevents adding items twice
+        var newDocuments = processedDocuments.ExceptBy(_workingDocuments.Select(d => d.DocumentNumber), d => d.DocumentNumber, StringComparer.OrdinalIgnoreCase).ToList();
+
+        // Cache and create views.
+        _workingDocuments.AddRange(newDocuments);
+        foreach (var document in newDocuments)
+        { 
+            AvailableDocuments.Add(new DocumentRowViewModel(AvailableDocuments.Count + 1, document, _downloadService, DestinationFolder));
+        }
+
+        OnPropertyChanged(nameof(FilesCount));
+        OnPropertyChanged(nameof(AnyItemsObsolete));
     }
 
     #endregion

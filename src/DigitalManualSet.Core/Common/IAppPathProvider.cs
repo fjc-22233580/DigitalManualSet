@@ -38,4 +38,9 @@ public interface IAppPathProvider
     /// </summary>
     string OpenOrdersFilePath { get; }
 
+    /// <summary>
+    /// Gets the master document list file path.
+    /// </summary>
+    string MasterDocumentListFilePath { get; }
+
 }

@@ -59,9 +59,7 @@
 
 
 
-        <Border
-            Grid.Row="1"
-            Margin="4">
+        <Border Grid.Row="1" Margin="4">
 
             <ContentControl Content="{Binding CurrentScreen.ViewModel}" />
         </Border>

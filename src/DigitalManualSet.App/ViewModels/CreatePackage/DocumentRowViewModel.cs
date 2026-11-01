@@ -84,9 +84,11 @@ public class DocumentRowViewModel : ViewModel
     public string Revision => _document.Revision;
 
     /// <summary>
-    /// Gets the document's category.
+    /// Gets the master register status.
     /// </summary>
-    public string Category => _document.Category;
+    public string RegisterStatus => _document.RegisterStatus.ToString();
+
+    public string Type => _document.Type.ToString();
 
     /// <summary>
     /// Gets or sets the current download status message.
@@ -124,8 +126,15 @@ public class DocumentRowViewModel : ViewModel
     /// Downloads the document asynchronously to the destination folder.
     /// Updates Status property with progress and result messages.
     /// </summary>
-    public async Task DownloadAsync()
+    public async Task<bool> DownloadAsync()
     {
+        if (_document.IsObsolete)
+        {
+            Status = "Skipped";
+            return true;
+        }
+
+
         try
         {
             IsDownloading = true;
@@ -136,18 +145,14 @@ public class DocumentRowViewModel : ViewModel
                 Status = message;
             });
 
-            var result = await _downloadService.DownloadAsync(
-                _document,
-                _destinationFolder,
-                progress);
-
-            Status = result.Success
-                ? "Downloaded"
-                : $"Failed: {result.ErrorMessage}";
+            var result = await _downloadService.DownloadAsync(_document, _destinationFolder, progress);
+            Status = result.Success ? "Downloaded" : $"{result.ErrorMessage}";
+            return result.Success;
         }
         catch (Exception ex)
         {
             Status = $"Failed: {ex.Message}";
+            return false;
         }
         finally
         {

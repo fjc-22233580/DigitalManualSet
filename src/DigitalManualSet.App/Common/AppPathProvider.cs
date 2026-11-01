@@ -63,5 +63,9 @@ public class AppPathProvider : IAppPathProvider
     /// Gets the open orders file path - held in I Drive mapped network location.
     /// </summary>
     public string OpenOrdersFilePath => @"I:\data\Mfg\Opns\Planning\Pub\Bible\MACHINE WORK TO LIST MK2.xlsm";
-    
+
+    /// <summary>
+    /// Gets the master document list file path.
+    /// </summary>
+    public string MasterDocumentListFilePath => Path.Combine(LocalAppDataFolder,"MasterAgileList.csv");
 }

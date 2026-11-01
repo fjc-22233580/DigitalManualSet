@@ -18,173 +18,325 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!--  Select documents container  -->
         <Grid Grid.Row="0">
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <TextBlock
-                Grid.Row="0"
-                Margin="8,0,0,10"
-                Text="Document Source:" />
-
-            <Border
-                Grid.Row="1"
-                Padding="10"
-                Style="{StaticResource ContainerStyle}">
-
-                <DockPanel LastChildFill="False">
-
-
-                    <StackPanel Margin="0,0,12,0" DockPanel.Dock="Left">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Filename: " />
-                            <TextBlock Text="{Binding DocumentsFilename}" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding DocumentCount}" />
-                            <TextBlock Text=" documents imported" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel DockPanel.Dock="Right">
-
-                        <TextBlock Text="Working folder: " />
-                        <TextBlock>
-                            <Hyperlink Command="{Binding OpenDestinationFolder}">
-                                <Run Text="{Binding DestinationFolder, Mode=OneWay}" />
-                            </Hyperlink>
-                        </TextBlock>
-                    </StackPanel>
-                </DockPanel>
-            </Border>
-        </Grid>
-
-
-        <Grid Grid.Row="1" Margin="0,20,0,0">
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <TextBlock
-                Grid.Row="0"
-                Margin="8,0,0,10"
-                Text="Documents:" />
-
-            <ScrollViewer Grid.Row="1">
-
-                <Grid Grid.IsSharedSizeScope="True">
+            <Border Padding="10" Style="{StaticResource ContainerStyle}">
+                <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <!--  Header  -->
-                    <Grid Grid.Row="0" Margin="12,0,0,8">
+                    <!--  Title and subtitle  -->
+                    <StackPanel Grid.Row="0">
+                        <TextBlock
+                            FontWeight="Bold"
+                            Style="{DynamicResource SubtitleTextBlockStyle}"
+                            Text="1. Import Order Data" />
+                        <TextBlock
+                            Margin="0,4,0,0"
+                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                            Style="{StaticResource BodyTextBlockStyle}"
+                            Text="Select the IFS exports for this order. Multiple files can be imported at one time." />
+                    </StackPanel>
 
+                    <!--  Select document button and file count  -->
+                    <DockPanel
+                        Grid.Row="1"
+                        Margin="0,8,0,0"
+                        LastChildFill="False">
+                        <Button
+                            Command="{Binding ImportDocumentsCommand}"
+                            Content="Select Exports"
+                            Style="{StaticResource AccentButtonStyle}" />
+                        <StackPanel
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                            <TextBlock Text="{Binding FilesCount}" />
+                            <TextBlock Text=" files imported" />
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+
+        <!--  Document data grid container  -->
+        <Border
+            Grid.Row="1"
+            Margin="0,8,0,0"
+            Padding="10"
+            Style="{StaticResource ContainerStyle}">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+
+                <!--  Title and subtitle  -->
+                <StackPanel Grid.Row="0" Grid.Column="0">
+                    <TextBlock
+                        FontWeight="Bold"
+                        Style="{DynamicResource SubtitleTextBlockStyle}"
+                        Text="2. Review Documents" />
+
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Text="Review documents and add additional items if required." />
+                </StackPanel>
+
+                <!--  Add document button  -->
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="0"
+                    HorizontalAlignment="Right"
+                    Command="{Binding AddDocumentCommand}"
+                    Content="Add Document" />
+
+
+                <!--  Datagrid  -->
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="0,8,0,0"
+                    Style="{StaticResource ContainerStyle}">
+
+                    <Grid Margin="0,0,0,0" Grid.IsSharedSizeScope="True">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!--  Header  -->
+                        <Grid Grid.Row="0" Margin="12,8,0,8">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="NumColumn" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="DocNumberColumn" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="NameColumn" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="RevisionColumn" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="TypeColumn" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="RegisterStatusColumn" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="StatusColumn" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="DeleteColumn" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                FontWeight="SemiBold"
+                                Text="#" />
+
+                            <TextBlock
+                                Grid.Column="1"
+                                FontWeight="SemiBold"
+                                Text="Document No." />
+
+                            <TextBlock
+                                Grid.Column="2"
+                                Margin="12,0"
+                                FontWeight="SemiBold"
+                                Text="Document Name" />
+
+                            <TextBlock
+                                Grid.Column="3"
+                                Margin="13,0,0,0"
+                                FontWeight="SemiBold"
+                                Text="Rev." />
+
+                            <TextBlock
+                                Grid.Column="4"
+                                Margin="13,0,0,0"
+                                FontWeight="SemiBold"
+                                Text="Type" />
+
+                            <TextBlock
+                                Grid.Column="5"
+                                Margin="13,0,0,0"
+                                FontWeight="SemiBold"
+                                Text="Agile Status" />
+
+                            <TextBlock
+                                Grid.Column="6"
+                                Margin="13,0,0,0"
+                                FontWeight="SemiBold"
+                                Text="Import Status" />
+
+                            <TextBlock
+                                Grid.Column="7"
+                                Margin="13,0,0,0"
+                                FontWeight="SemiBold"
+                                Text="Delete"
+                                Visibility="{Binding IsAnyManuallyAddedDocument, Converter={StaticResource BoolToVisibility}}" />
+                        </Grid>
+
+
+                        <Separator Grid.Row="1" />
+
+                        <!--  Scrollbar and items control of documents  -->
+                        <ScrollViewer Grid.Row="2">
+                            <ItemsControl AlternationCount="2" ItemsSource="{Binding AvailableDocuments}">
+
+                                <ItemsControl.Resources>
+                                    <AlternationConverter x:Key="RowBackgroundConverter">
+                                        <SolidColorBrush Color="#18000000" />
+                                        <SolidColorBrush Color="Transparent" />
+                                    </AlternationConverter>
+                                </ItemsControl.Resources>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <local:DocumentRowView Background="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource AncestorType=ContentPresenter}, Converter={StaticResource RowBackgroundConverter}}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <Separator
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="0,4,0,0"
+                    Visibility="{Binding AnyItemsObsolete, Converter={StaticResource BoolToVisibility}}" />
+
+                <!--  Warning icon if obsolete items found  -->
+                <Border
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="0,8,0,0"
+                    Padding="8"
+                    Style="{StaticResource ContainerStyle}"
+                    Visibility="{Binding AnyItemsObsolete, Converter={StaticResource BoolToVisibility}}">
+
+                    <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="NumColumn" />
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="DocNumberColumn" />
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="NameColumn" />
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="RevisionColumn" />
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="CategoryColumn" />
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="StatusColumn" />
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="DeleteColumn" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
                         <TextBlock
+                            x:Name="Icon"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="22"
+                            Text="&#xE7BA;" />
+
+                        <TextBlock
                             Grid.Column="1"
-                            FontWeight="SemiBold"
-                            Text="Document No." />
+                            Margin="8,0,0,0"
+                            Text="Obsolete item(s) found. These will be ignored from the package creation." />
 
-                        <TextBlock
-                            Grid.Column="2"
-                            Margin="12,0"
-                            FontWeight="SemiBold"
-                            Text="Document Name" />
-
-                        <TextBlock
-                            Grid.Column="3"
-                            Margin="13,0,0,0"
-                            FontWeight="SemiBold"
-                            Text="Revision" />
-
-                        <TextBlock
-                            Grid.Column="4"
-                            Margin="13,0,0,0"
-                            FontWeight="SemiBold"
-                            Text="Category" />
-
-                        <TextBlock
-                            Grid.Column="5"
-                            Margin="13,0,0,0"
-                            FontWeight="SemiBold"
-                            Text="Status" />
-
-                        <TextBlock
-                            Grid.Column="6"
-                            Margin="13,0,0,0"
-                            FontWeight="SemiBold"
-                            Text="Delete"
-                            Visibility="{Binding IsAnyManuallyAddedDocument, Converter={StaticResource BoolToVisibility}}" />
                     </Grid>
+                </Border>
+            </Grid>
+        </Border>
 
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding AvailableDocuments}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <local:DocumentRowView DataContext="{Binding}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Grid>
-            </ScrollViewer>
-        </Grid>
+        <!--  Download and validate container  -->
+        <Border
+            Grid.Row="2"
+            Margin="0,8,0,0"
+            Padding="10"
+            Style="{StaticResource ContainerStyle}">
 
-        <Grid Grid.Row="2" Margin="0,20,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <TextBlock
-                Grid.Row="0"
-                Margin="8,0,0,10"
-                Text="Download Status:" />
-
-            <Border
-                Grid.Row="1"
-                Padding="10"
-                Style="{StaticResource ContainerStyle}">
-
-                <StackPanel>
-
-                    <TextBlock Margin="0,0,0,8" Text="{Binding DownloadStatus}" />
-
-                    <ProgressBar
-                        Maximum="100"
-                        Minimum="0"
-                        Value="{Binding OverallProgress}" />
-
-                    <Button
-                        Margin="12"
-                        HorizontalAlignment="Center"
-                        Command="{Binding BeginDownloadCommand}"
-                        Content="Download all" />
-
-                    <Button
-                        Margin="0"
-                        HorizontalAlignment="Center"
-                        Command="{Binding AddDocumentCommand}"
-                        Content="Add Document" />
+                <!--  Title and subtitle  -->
+                <StackPanel Grid.Row="0" Grid.Column="0">
+                    <TextBlock
+                        FontWeight="Bold"
+                        Style="{DynamicResource SubtitleTextBlockStyle}"
+                        Text="3. Download and Validate" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Text="Documents will be retrieved and checked locally to the working folder." />
                 </StackPanel>
-            </Border>
-        </Grid>
+
+
+                <!--  Begin download button  -->
+                <Button
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,8"
+                    Command="{Binding BeginDownloadCommand}"
+                    Content="Start Download"
+                    Style="{StaticResource AccentButtonStyle}" />
+
+                <!--  Open folder hyperlink  -->
+                <StackPanel
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    DockPanel.Dock="Right">
+
+                    <TextBlock Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="Working folder: " />
+                    <TextBlock>
+                        <Hyperlink Command="{Binding OpenDestinationFolder}">
+                            <Run Text="{Binding DestinationFolder, Mode=OneWay}" />
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+
+                <!--  Downloading summary texts  -->
+                <DockPanel
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="0,8,0,0"
+                    LastChildFill="False">
+
+                    <TextBlock
+                        Margin="0,0,0,8"
+                        DockPanel.Dock="Left"
+                        Text="{Binding DownloadStatus}" />
+
+                    <TextBlock DockPanel.Dock="Right">
+                        <Run Text="{Binding OverallProgress, StringFormat={}{0:0}}" />
+                        <Run Text="%" />
+                    </TextBlock>
+                </DockPanel>
+
+                <!--  Download progress bar  -->
+                <ProgressBar
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Height="12"
+                    Maximum="100"
+                    Minimum="0"
+                    Style="{StaticResource RoundedFluentProgressBar}"
+                    Value="{Binding OverallProgress}" />
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

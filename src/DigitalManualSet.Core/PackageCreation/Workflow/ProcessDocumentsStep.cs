@@ -21,17 +21,7 @@ public sealed class ProcessDocumentsStep : WorkflowStep<PackageWorkflowStepId>
     {
         _documentProvider = documentProvider;
     }
-
-    /// <summary>
-    /// Gets the documents available for processing.
-    /// </summary>
-    public IReadOnlyList<Document> AvailableDocuments { get; private set; } = [];
-
-    /// <summary>
-    /// Gets the CSV filename for the documents.
-    /// </summary>
-    public string DocumentsFilename => _documentProvider.CsvFileName;
-
+    
     /// <summary>
     /// Gets the working folder path for the package.
     /// </summary>
@@ -51,7 +41,6 @@ public sealed class ProcessDocumentsStep : WorkflowStep<PackageWorkflowStepId>
     /// </summary>
     public override async Task OnEnterAsync()
     {
-        AvailableDocuments = await _documentProvider.GetDocumentsAsync();
         Package.ClearDocuments();
     }
 
@@ -65,12 +54,12 @@ public sealed class ProcessDocumentsStep : WorkflowStep<PackageWorkflowStepId>
     /// Updates the validation state of the package based on document validation status.
     /// Sets validated documents and triggers navigation state change if all are valid.
     /// </summary>
-    public void UpdateValidationState()
+    /// <param name="workingDocuments"></param>
+    public void UpdateValidationState(List<Document> workingDocuments)
     {
-        if (AvailableDocuments.All(doc => doc.IsValidated))
+        if (workingDocuments.All(doc => doc.IsValidated))
         {
-            Package.SetValidatedDocuments(AvailableDocuments);
-
+            Package.SetValidatedDocuments(workingDocuments);
             OnNavigationStateChanged();
         }
     }
