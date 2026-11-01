@@ -1,19 +1,29 @@
-﻿using System.Text;
+﻿
+using System.Text;
 using DigitalManualSet.Core.Documents;
 
 namespace DigitalManualSet.Infrastructure.Documents;
 
 /// <summary>
 /// Provides documents by reading them from a CSV file.
+/// Supports the default document format and configurable ERP exports.
 /// </summary>
 public class CsvDocumentProvider : IDocumentProvider
 {
     /// <summary>
-    /// The expected number of columns in each document row.
+    /// The expected number of columns in the default document format.
     /// </summary>
     private const int ExpectedColumnCount = 4;
 
+    private static readonly string[] DocumentPrefixes =
+    [
+        "F",
+        "M",
+        "HS"
+    ];
+
     private readonly string _filePath;
+    private readonly CsvImportDefinition? _importDefinition;
 
     /// <summary>
     /// Gets the filename of the CSV file without extension.
@@ -21,16 +31,14 @@ public class CsvDocumentProvider : IDocumentProvider
     public string CsvFileName => Path.GetFileNameWithoutExtension(_filePath);
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="CsvDocumentProvider"/> class.
+    /// Initialises a new instance of the CsvDocumentProvider class.
     /// </summary>
-    /// <param name="filePath">The path of the CSV file containing the documents.</param>
-    /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="filePath"/> is null or empty.
-    /// </exception>
-    /// <exception cref="FileNotFoundException">
-    /// Thrown when the file at <paramref name="filePath"/> does not exist.
-    /// </exception>
-    public CsvDocumentProvider(string filePath)
+    /// <param name="filePath">The path of the CSV file.</param>
+    /// <param name="importDefinition">
+    /// Optional ERP import configuration. When null, the default
+    /// four-column document format is used.
+    /// </param>
+    public CsvDocumentProvider(string filePath, CsvImportDefinition? importDefinition = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
@@ -39,12 +47,21 @@ public class CsvDocumentProvider : IDocumentProvider
             throw new FileNotFoundException("The documents file could not be found.", filePath);
         }
 
+        // If we have an import definition then validate it.
+        if (importDefinition is not null 
+            && (importDefinition.DocumentNumberColumnIndex < 0 || importDefinition.DocumentNameColumnIndex < 0))
+        {
+            throw new ArgumentOutOfRangeException(nameof(importDefinition), "CSV column indices cannot be negative.");
+        }
+
         _filePath = filePath;
+        _importDefinition = importDefinition;
     }
 
     /// <summary>
-    /// Reads and parses all documents from the CSV file asynchronously.
-    /// Expected CSV format: DocumentNumber,DocumentName,Revision,Category (with header row).
+    /// Reads and parses documents from the CSV file asynchronously.
+    /// When an import definition is supplied, only document numbers
+    /// beginning with F, M or HS are imported.
     /// </summary>
     /// <inheritdoc />
     public async Task<IReadOnlyList<Document>> GetDocumentsAsync(CancellationToken cancellationToken = default)
@@ -58,8 +75,7 @@ public class CsvDocumentProvider : IDocumentProvider
 
         var documents = new List<Document>();
 
-        // The first row contains:
-        // DocumentNumber,DocumentName,Revision,Category
+        // Skip the header row.
         foreach (var line in lines.Skip(1))
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -71,26 +87,58 @@ public class CsvDocumentProvider : IDocumentProvider
 
             var values = ParseLine(line);
 
-            if (values.Count != ExpectedColumnCount)
+            // Document parsing for inbuilt dummy documents
+            if (_importDefinition is null)
             {
-                throw new InvalidDataException($"The documents row does not contain {ExpectedColumnCount} columns: '{line}'.");
+                // Default four-column document format.
+                if (values.Count != ExpectedColumnCount)
+                {
+                    throw new InvalidDataException($"The documents row does not contain " + $"{ExpectedColumnCount} columns: '{line}'.");
+                }
+
+                var documentNumber = values[0].Trim();
+                var documentName = values[1].Trim();
+                var revision = values[2].Trim();
+                var category = values[3].Trim();
+
+                if (string.IsNullOrWhiteSpace(documentNumber) ||
+                    string.IsNullOrWhiteSpace(documentName) ||
+                    string.IsNullOrWhiteSpace(revision) ||
+                    string.IsNullOrWhiteSpace(category))
+                {
+                    throw new InvalidDataException($"The documents row contains an empty value: '{line}'.");
+                }
+
+                documents.Add(new Document(documentNumber, documentName, revision, category));
+                continue;
             }
 
-            var documentNumber = values[0].Trim();
-            var documentName = values[1].Trim();
-            var revision = values[2].Trim();
-            var category = values[3].Trim();
+            // Configured ERP export format.
+            var numberIndex = _importDefinition.DocumentNumberColumnIndex;
+            var nameIndex = _importDefinition.DocumentNameColumnIndex;
 
-            if (string.IsNullOrWhiteSpace(documentNumber) ||
-                string.IsNullOrWhiteSpace(documentName) ||
-                string.IsNullOrWhiteSpace(revision) ||
-                string.IsNullOrWhiteSpace(category))
+            if (values.Count <= Math.Max(numberIndex, nameIndex))
             {
-                throw new InvalidDataException(
-                    $"The documents row contains an empty value: '{line}'.");
+                throw new InvalidDataException($"The CSV row does not contain the configured " + $"columns: '{line}'.");
             }
 
-            documents.Add(new Document(documentNumber, documentName, revision, category));
+            var number = values[numberIndex].Trim();
+            var name = values[nameIndex].Trim();
+
+            // Only import M, F and HS document references.
+            if (DocumentPrefixes.Any(prefix => number.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) == false)
+            {
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new InvalidDataException($"Document '{number}' has no description.");
+            }
+
+            // Revision and category will be populated later
+            // using the master document register.
+            documents.Add(new Document(number, name, string.Empty, string.Empty));
         }
 
         return documents;

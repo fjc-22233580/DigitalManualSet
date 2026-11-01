@@ -1,6 +1,6 @@
 ﻿using DigitalManualSet.Core.Services;
 
-namespace DigitalManualSet.Infrastructure.Services;
+namespace DigitalManualSet.Infrastructure;
 
 /// <summary>
 /// Removes user content from a removable drive while leaving

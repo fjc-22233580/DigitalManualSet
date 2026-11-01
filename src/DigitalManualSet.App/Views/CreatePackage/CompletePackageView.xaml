@@ -511,8 +511,8 @@
                     <Grid>
 
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
                         <Grid.RowDefinitions>
@@ -526,7 +526,10 @@
                             Style="{DynamicResource SubtitleTextBlockStyle}"
                             Text="Package Summary" />
 
-                        <Grid  Grid.Column="0" Grid.Row="1" Margin="0,8,0,0">
+                        <Grid
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Margin="0,8,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
@@ -545,7 +548,7 @@
 
                             </StackPanel>
 
-                            <StackPanel Grid.Column="1" >
+                            <StackPanel Grid.Column="1">
 
                                 <TextBlock Text="{Binding DocumentsSummary}" />
                                 <TextBlock Text="{Binding ManifestSummary}" />
