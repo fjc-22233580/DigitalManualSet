@@ -65,6 +65,11 @@ public class Document
     public DocumentRegisterStatus RegisterStatus { get; set; } = DocumentRegisterStatus.NotValidated;
 
     /// <summary>
+    /// Gets or sets the type of the category.
+    /// </summary>
+    public DocumentCategory CategoryType { get; set; } = DocumentCategory.OrderSpecific;
+
+    /// <summary>
     /// Initializes a new instance of the Document class with the specified metadata.
     /// </summary>
     public Document(string documentNumber, string documentName, string revision, string category)

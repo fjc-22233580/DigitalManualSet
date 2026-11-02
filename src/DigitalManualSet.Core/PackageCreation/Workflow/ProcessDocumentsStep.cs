@@ -21,6 +21,14 @@ public sealed class ProcessDocumentsStep : WorkflowStep<PackageWorkflowStepId>
     {
         _documentProvider = documentProvider;
     }
+
+    /// <summary>
+    /// Gets the order.
+    /// </summary>
+    /// <value>
+    /// The order.
+    /// </value>
+    public Order Order => Package.Order!;
     
     /// <summary>
     /// Gets the working folder path for the package.

@@ -11,6 +11,10 @@ public class CsvDocumentRegisterProvider : IDocumentRegisterProvider
 {
     private readonly string _filePath;
 
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, DocumentRegisterEntry> Register { get; private set; } =
+        new Dictionary<string, DocumentRegisterEntry>(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>
     /// Initialises a new instance of the CsvDocumentRegisterProvider class.
     /// </summary>
@@ -27,7 +31,7 @@ public class CsvDocumentRegisterProvider : IDocumentRegisterProvider
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyDictionary<string, DocumentRegisterEntry>> LoadAsync(CancellationToken cancellationToken = default)
+    public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
         var lines = await File.ReadAllLinesAsync(
             _filePath, cancellationToken);
@@ -100,7 +104,7 @@ public class CsvDocumentRegisterProvider : IDocumentRegisterProvider
             }
         }
 
-        return documents;
+        Register = documents;
     }
 
     /// <summary>

@@ -77,7 +77,9 @@ public class LocalDocumentDownloadService : IDocumentDownloadService
 
             var sourceFile = Directory
                 .EnumerateFiles(_sourceDirectory)
-                .FirstOrDefault(file => string.Equals(Path.GetFileNameWithoutExtension(file), document.DocumentNumber, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(file =>
+                    Path.GetFileNameWithoutExtension(file)
+                        .Contains(document.DocumentNumber, StringComparison.OrdinalIgnoreCase));
 
             if (sourceFile is null)
             {

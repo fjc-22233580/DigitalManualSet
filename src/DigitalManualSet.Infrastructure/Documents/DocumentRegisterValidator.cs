@@ -10,11 +10,22 @@ namespace DigitalManualSet.Infrastructure.Documents;
 /// </summary>
 public class DocumentRegisterValidator : IDocumentRegisterValidator
 {
+    private readonly IDocumentRegisterProvider _documentRegisterProvider;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DocumentRegisterValidator"/> class.
+    /// </summary>
+    /// <param name="documentRegisterProvider">The document register provider.</param>
+    public DocumentRegisterValidator(IDocumentRegisterProvider documentRegisterProvider)
+    {
+        _documentRegisterProvider = documentRegisterProvider;
+    }
+
     /// <inheritdoc />
-    public IReadOnlyList<Document> Validate(IReadOnlyList<Document> documents, IReadOnlyDictionary<string, DocumentRegisterEntry> register)
+    public IReadOnlyList<Document> Validate(IReadOnlyList<Document> documents)
     {
         ArgumentNullException.ThrowIfNull(documents);
-        ArgumentNullException.ThrowIfNull(register);
+        ArgumentNullException.ThrowIfNull(_documentRegisterProvider.Register);
 
         foreach (var document in documents)
         {
@@ -22,7 +33,7 @@ public class DocumentRegisterValidator : IDocumentRegisterValidator
             document.Type = DetermineDocumentType(
                 document.DocumentNumber);
 
-            if (register.TryGetValue(document.DocumentNumber.Trim(), out var entry) == false)
+            if (_documentRegisterProvider.Register.TryGetValue(document.DocumentNumber.Trim(), out var entry) == false)
             {
                 document.RegisterStatus = DocumentRegisterStatus.NotFound;
                 document.LifecyclePhase = null;
