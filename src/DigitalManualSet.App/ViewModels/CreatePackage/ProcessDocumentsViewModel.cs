@@ -1,13 +1,16 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
-using DigitalManualSet.App.Common;
+﻿using DigitalManualSet.App.Common;
+using DigitalManualSet.App.Services.Interfaces;
 using DigitalManualSet.App.ViewModels.CreatePackage.Interfaces;
 using DigitalManualSet.Core.Common;
 using DigitalManualSet.Core.Documents;
+using DigitalManualSet.Core.Models;
 using DigitalManualSet.Core.PackageCreation.Workflow;
-using System.IO;
-using DigitalManualSet.App.Services.Interfaces;
+using DigitalManualSet.Core.Services;
 using Microsoft.Win32;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace DigitalManualSet.App.ViewModels.CreatePackage;
 
@@ -23,6 +26,8 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     private readonly IAddDocumentDialogService _addDocumentDialogService;
     private readonly IMessageService _messageService;
     private readonly IOrderImportOrchestrator _orderImportOrchestrator;
+    private readonly IDocumentCatalogueService _catalogueService;
+    private readonly IDocumentRegisterValidator _documentRegisterValidator;
     private readonly ProcessDocumentsStep _step;
     private DocumentValidationResult? _validationResult;
     private bool _isDownloading;
@@ -43,6 +48,9 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// <param name="documentValidationService">The document validation service.</param>
     /// <param name="addDocumentDialogService">The add document dialog service.</param>
     /// <param name="messageService">The message service.</param>
+    /// <param name="orderImportOrchestrator">The order import orchestrator.</param>
+    /// <param name="catalogueService">The catalogue service.</param>
+    /// <param name="documentRegisterValidator"></param>
     /// <exception cref="System.ArgumentException">Expected a {nameof(CreateOrderStep)}. - step</exception>
     public ProcessDocumentsViewModel(ProcessDocumentsStep step,
         IDocumentDownloadService downloadService,
@@ -50,7 +58,9 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         IDocumentValidationService documentValidationService,
         IAddDocumentDialogService addDocumentDialogService,
         IMessageService messageService,
-        IOrderImportOrchestrator orderImportOrchestrator)
+        IOrderImportOrchestrator orderImportOrchestrator,
+        IDocumentCatalogueService catalogueService,
+        IDocumentRegisterValidator documentRegisterValidator)
     {
         _step = step ?? throw new ArgumentException($"Expected a {nameof(CreateOrderStep)}.", nameof(step));
         _downloadService = downloadService;
@@ -59,11 +69,14 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         _addDocumentDialogService = addDocumentDialogService;
         _messageService = messageService;
         _orderImportOrchestrator = orderImportOrchestrator;
+        _catalogueService = catalogueService;
+        _documentRegisterValidator = documentRegisterValidator;
 
         _step.SetWorkingFolder(_appPathProvider.DocumentsFolder);
         Directory.CreateDirectory(DestinationFolder);
 
         CreateCommands();
+        CreateFixedDocuments();
     }
 
     #endregion
@@ -113,7 +126,6 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         $"{_completedDocumentsCount} / {DocumentCount}"
         + (_isDownloading ? " downloading" : " downloaded")
         + (_validationResult?.IsValid == true ? " and validated" : "");
-   
 
     /// <summary>
     /// Gets the destination folder path where documents are downloaded.
@@ -124,6 +136,7 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// Gets the collection of documents available for download.
     /// </summary>
     public ObservableCollection<DocumentRowViewModel> AvailableDocuments { get; } = new();
+
 
     /// <summary>
     /// Gets a value indicating whether any of the documents are manually added.
@@ -250,7 +263,11 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         _validationResult = _documentValidationService.Validate(_workingDocuments, DestinationFolder);
         if (_validationResult.IsValid)
         {
-            _step.UpdateValidationState(_workingDocuments);
+            var validItems = _workingDocuments
+                .Where(doc => doc.IsValidated)
+                .ToList();
+
+            _step.UpdateValidationState(validItems);
         }
 
         // Update UI
@@ -342,6 +359,50 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
 
         OnPropertyChanged(nameof(FilesCount));
         OnPropertyChanged(nameof(AnyItemsObsolete));
+        OnPropertyChanged(nameof(DownloadStatus));
+    }
+
+
+    /// <summary>
+    /// Creates the fixed / generic documents.
+    /// </summary>
+    private void CreateFixedDocuments()
+    {
+        string modelNumber = Regex.Match(_step.Order.SystemId, @"^(?:E\d+|\d+)", RegexOptions.IgnoreCase).Value;
+        var orderFixedDocuments = _catalogueService.GetDocumentsForModel(modelNumber);
+        if (orderFixedDocuments.Count == 0)
+        {
+            return;
+        }
+
+        var documents = orderFixedDocuments.Select(Create<Document>).ToList();
+        var validatedDocuments = _documentRegisterValidator.Validate(documents);
+        var newDocuments = validatedDocuments.ExceptBy(_workingDocuments.Select(d => d.DocumentNumber), d => d.DocumentNumber, StringComparer.OrdinalIgnoreCase).ToList();
+
+        _workingDocuments.AddRange(newDocuments);
+        foreach (var document in newDocuments)
+        {
+            AvailableDocuments.Add(new DocumentRowViewModel(AvailableDocuments.Count + 1, document, _downloadService, DestinationFolder));
+        }
+
+        OnPropertyChanged(nameof(FilesCount));
+        OnPropertyChanged(nameof(AnyItemsObsolete));
+        OnPropertyChanged(nameof(DownloadStatus));
+
+    }
+
+    /// <summary>
+    /// Factory for creating a document from a catalogue document.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="arg">The argument.</param>
+    /// <returns></returns>
+    private Document Create<T>(CatalogueDocument arg)
+    {
+        return new Document(arg.DocumentNumber, arg.DocumentName, arg.Revision, "")
+        {
+            CategoryType = DocumentCategory.Generic,
+        };
     }
 
     #endregion

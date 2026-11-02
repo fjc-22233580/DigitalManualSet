@@ -8,7 +8,6 @@ namespace DigitalManualSet.Infrastructure.Documents;
 /// </summary>
 public class OrderImportOrchestrator : IOrderImportOrchestrator
 {
-    private readonly IDocumentRegisterProvider _registerProvider;
     private readonly IDocumentRegisterValidator _validator;
 
     /// <summary>
@@ -27,9 +26,12 @@ public class OrderImportOrchestrator : IOrderImportOrchestrator
         };
 
 
-    public OrderImportOrchestrator(IDocumentRegisterProvider registerProvider, IDocumentRegisterValidator validator)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OrderImportOrchestrator"/> class.
+    /// </summary>
+    /// <param name="validator">The validator.</param>
+    public OrderImportOrchestrator(IDocumentRegisterValidator validator)
     {
-        _registerProvider = registerProvider;
         _validator = validator;
     }
 
@@ -60,11 +62,8 @@ public class OrderImportOrchestrator : IOrderImportOrchestrator
         // Remove duplicates from the imported documents.
         var uniqueDocuments = documents.DistinctBy(d => d.DocumentNumber, StringComparer.OrdinalIgnoreCase).ToList();
 
-        // Load the master register.
-        var register = await _registerProvider.LoadAsync(cancellationToken);
-
         // Apply current revisions and lifecycle statuses.
-        return _validator.Validate(uniqueDocuments, register);
+        return _validator.Validate(uniqueDocuments);
 
     }
 

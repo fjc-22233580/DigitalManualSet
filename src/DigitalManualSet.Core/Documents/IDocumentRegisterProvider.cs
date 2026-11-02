@@ -6,9 +6,13 @@
 public interface IDocumentRegisterProvider
 {
     /// <summary>
+    /// Gets the loaded document register entries keyed by document number.
+    /// </summary>
+    IReadOnlyDictionary<string, DocumentRegisterEntry> Register { get; }
+
+    /// <summary>
     /// Loads the document register entries asynchronously.
     /// </summary>
     /// <param name="cancellationToken">The token used to cancel the load operation.</param>
-    /// <returns>A case-insensitive mapping from document number to register entry.</returns>
-    Task<IReadOnlyDictionary<string, DocumentRegisterEntry>> LoadAsync(CancellationToken cancellationToken = default);
+    Task LoadAsync(CancellationToken cancellationToken = default);
 }

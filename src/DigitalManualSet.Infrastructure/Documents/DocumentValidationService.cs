@@ -19,17 +19,21 @@ public class DocumentValidationService : IDocumentValidationService
 
         foreach (var document in documents)
         {
+            // Skip obsolete items
+            if (document.IsObsolete)
+            {
+                continue;
+            }
+
             document.IsValidated = false;
             document.LocalFilePath = null;
 
             var matchingFiles = Directory
                 .EnumerateFiles(workingDirectory)
                 .Where(file =>
-                    string.Equals(
-                        Path.GetFileNameWithoutExtension(file),
-                        document.DocumentNumber,
-                        StringComparison.OrdinalIgnoreCase))
-                .ToList();
+                        Path.GetFileNameWithoutExtension(file)
+                            .Contains(document.DocumentNumber, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
 
             if (matchingFiles.Count == 0)
             {

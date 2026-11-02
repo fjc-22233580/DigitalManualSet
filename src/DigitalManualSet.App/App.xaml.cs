@@ -58,11 +58,18 @@ namespace DigitalManualSet.App
             Log.Information(pcInfo);
 
             ConfigureServices();
+
+            var documentRegisterProvider = _serviceProvider.GetRequiredService<IDocumentRegisterProvider>();
+            await documentRegisterProvider.LoadAsync();
+
             await DepersistSettings();
 
             QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
             await ParseOpenOrders();
+
+            var catalogue = _serviceProvider.GetRequiredService<IDocumentCatalogueService>();
+            await catalogue.LoadAsync();
 
             var mainWindow = new MainWindow
             {
@@ -173,6 +180,8 @@ namespace DigitalManualSet.App
             services.AddSingleton<IDocumentDownloadService>(_ => new LocalDocumentDownloadService(_appPathProvider.TestDocuments));
 
             services.AddSingleton<IDocumentValidationService, DocumentValidationService>();
+
+            services.AddSingleton<IDocumentCatalogueService>(_ => new DocumentCatalogueService(Path.Combine(_appPathProvider.DocumentsFolder, "documents.json")));
 
 
             services.AddSingleton<IAddDocumentDialogService, AddDocumentDialogService>();
