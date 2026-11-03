@@ -45,7 +45,7 @@ public class Package
     /// <summary>
     /// Gets the list of documents in this package.
     /// </summary>
-    public List<Document>? Documents { get; private set; } = null;
+    public List<Document>? Documents { get; set; } = null;
 
     /// <summary>
     /// Gets the document count.
