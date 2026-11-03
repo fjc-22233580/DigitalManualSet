@@ -73,9 +73,7 @@
         VerticalAlignment="Center"
         Columns="2">
 
-        <Button
-            Command="{Binding CreatePackageCommand}"
-            Style="{StaticResource HomeTileButtonStyle}">
+        <Button Command="{Binding CreatePackageCommand}" Style="{StaticResource HomeTileButtonStyle}">
 
             <StackPanel>
                 <!--  Icon  -->

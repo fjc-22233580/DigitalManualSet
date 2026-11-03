@@ -57,7 +57,10 @@ public class Document
     /// </summary>
     public string? LifecyclePhase { get; set; }
 
-    public bool IsObsolete => LifecyclePhase!.Equals("Obsolete", StringComparison.InvariantCultureIgnoreCase);
+    /// <summary>
+    /// Gets a value indicating whether this instance is obsolete.
+    /// </summary>
+    public bool IsObsolete => string.Equals(LifecyclePhase, "Obsolete", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Gets the document's master register validation status.

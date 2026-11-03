@@ -70,7 +70,7 @@ public class LocalDocumentDownloadService : IDocumentDownloadService
         {
             progress?.Report("Finding document...");
 
-            var delay = Random.Shared.Next(1000, 1500);
+            var delay = Random.Shared.Next(500, 1000);
             await Task.Delay(delay);
 
             Directory.CreateDirectory(destinationDirectory);
@@ -91,7 +91,7 @@ public class LocalDocumentDownloadService : IDocumentDownloadService
 
             progress?.Report("Copying document...");
 
-            var delay2 = Random.Shared.Next(2100, 3500);
+            var delay2 = Random.Shared.Next(1000, 2500);
 
             await Task.Delay(delay2);
 
