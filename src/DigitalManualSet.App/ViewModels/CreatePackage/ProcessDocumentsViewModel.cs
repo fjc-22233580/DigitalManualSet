@@ -368,7 +368,7 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// </summary>
     private void CreateFixedDocuments()
     {
-        string modelNumber = Regex.Match(_step.Order.SystemId, @"^(?:E\d+|\d+)", RegexOptions.IgnoreCase).Value;
+        string modelNumber = _step.Order.SystemType;
         var orderFixedDocuments = _catalogueService.GetDocumentsForModel(modelNumber);
         if (orderFixedDocuments.Count == 0)
         {

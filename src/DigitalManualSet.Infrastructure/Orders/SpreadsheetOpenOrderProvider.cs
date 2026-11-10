@@ -1,4 +1,5 @@
-﻿using DigitalManualSet.Core.Orders;
+﻿using System.CodeDom;
+using DigitalManualSet.Core.Orders;
 using ExcelDataReader;
 using Microsoft.Extensions.Logging;
 
@@ -27,6 +28,11 @@ public class SpreadsheetOpenOrderProvider : IOpenOrderProvider
     /// Zero-based column index of the customer name.
     /// </summary>
     private const int CustomerNameIndex = 10;
+
+    /// <summary>
+    /// Zero-based column index of the order class (system type).
+    /// </summary>
+    private const int OrderClassIndex = 5;
 
     /// <summary>
     /// The logger.
@@ -141,7 +147,10 @@ public class SpreadsheetOpenOrderProvider : IOpenOrderProvider
                     var order = new Order(
                         orderNumber: orderNumber,
                         customerName: reader.GetValue(CustomerNameIndex)?.ToString()?.Trim() ?? string.Empty,
-                        systemId: reader.GetValue(SystemIdIndex)?.ToString()?.Trim() ?? string.Empty);
+                        systemId: reader.GetValue(SystemIdIndex)?.ToString()?.Trim() ?? string.Empty)
+                    {
+                        SystemType = reader.GetValue(OrderClassIndex)?.ToString()?.Trim() ?? string.Empty,
+                    };
 
                     orders.Add(order);
                 }

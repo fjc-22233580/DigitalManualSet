@@ -261,9 +261,12 @@ public class CreateOrderViewModel : ViewModel, IPackageWorkflowStepViewModel
     {
         Order? order = null;
 
-        if (ValidateManualOrder() && ValidateOrderNumber())
+        if (ValidateManualOrder() && ValidateOrderNumber() && ValidateSystemId(out var systemType))
         {
-            order = new Order(OrderNumber, CustomerName, SystemId);
+            order = new Order(OrderNumber, CustomerName, SystemId)
+            {
+                SystemType = systemType
+            };
         }
 
         SetOrder(order);
@@ -308,6 +311,31 @@ public class CreateOrderViewModel : ViewModel, IPackageWorkflowStepViewModel
             return false;
         }
 
+        return true;
+    }
+
+    /// <summary>
+    /// Validates that the manually entered System ID starts with one of the
+    /// supported <see cref="SystemIdPrefixes.ValidPrefixes"/>, for example VHSMTB12345.
+    /// </summary>
+    /// <param name="systemType">The matching System ID prefix when validation succeeds.</param>
+    /// <returns>
+    /// <see langword="true"/> when the System ID is valid;
+    /// otherwise <see langword="false"/>.
+    /// </returns>
+    private bool ValidateSystemId(out string systemType)
+    {
+        ValidationMessage = string.Empty;
+
+        var prefix = SystemIdPrefixes.GetPrefix(SystemId.Trim());
+        if (prefix is null)
+        {
+            systemType = string.Empty;
+            ValidationMessage = "System ID must start with a supported system type, for example 8801, E1, etc.";
+            return false;
+        }
+
+        systemType = prefix;
         return true;
     }
 
