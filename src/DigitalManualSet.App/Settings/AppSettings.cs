@@ -22,4 +22,9 @@ public class AppSettings
     /// Gets or sets the last package file path opened by the user. Defaults to an empty string.
     /// </summary>
     public string LastOpenedPackagePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the application runs in demo mode. Defaults to <c>false</c>.
+    /// </summary>
+    public bool DemoMode { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using DigitalManualSet.App.Common;
 using DigitalManualSet.App.Services.Interfaces;
+using DigitalManualSet.App.Settings;
 using DigitalManualSet.App.ViewModels.CreatePackage.Interfaces;
 using DigitalManualSet.Core.Common;
 using DigitalManualSet.Core.Documents;
@@ -28,6 +29,8 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     private readonly IOrderImportOrchestrator _orderImportOrchestrator;
     private readonly IDocumentCatalogueService _catalogueService;
     private readonly IDocumentRegisterValidator _documentRegisterValidator;
+    private readonly AppSettingsService _appSettingsService;
+    private readonly IDocumentProvider _demoDocumentProvider;
     private readonly ProcessDocumentsStep _step;
     private DocumentValidationResult? _validationResult;
     private bool _isDownloading;
@@ -51,6 +54,8 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// <param name="orderImportOrchestrator">The order import orchestrator.</param>
     /// <param name="catalogueService">The catalogue service.</param>
     /// <param name="documentRegisterValidator"></param>
+    /// <param name="appSettingsService">The application settings service, used to check demo mode.</param>
+    /// <param name="demoDocumentProvider">The provider for the built-in test documents used in demo mode.</param>
     /// <exception cref="System.ArgumentException">Expected a {nameof(CreateOrderStep)}. - step</exception>
     public ProcessDocumentsViewModel(ProcessDocumentsStep step,
         IDocumentDownloadService downloadService,
@@ -60,7 +65,9 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         IMessageService messageService,
         IOrderImportOrchestrator orderImportOrchestrator,
         IDocumentCatalogueService catalogueService,
-        IDocumentRegisterValidator documentRegisterValidator)
+        IDocumentRegisterValidator documentRegisterValidator,
+        AppSettingsService appSettingsService,
+        IDocumentProvider demoDocumentProvider)
     {
         _step = step ?? throw new ArgumentException($"Expected a {nameof(CreateOrderStep)}.", nameof(step));
         _downloadService = downloadService;
@@ -71,6 +78,8 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         _orderImportOrchestrator = orderImportOrchestrator;
         _catalogueService = catalogueService;
         _documentRegisterValidator = documentRegisterValidator;
+        _appSettingsService = appSettingsService;
+        _demoDocumentProvider = demoDocumentProvider;
 
         _step.SetWorkingFolder(_appPathProvider.DocumentsFolder);
         Directory.CreateDirectory(DestinationFolder);
@@ -95,11 +104,11 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// <summary>
     /// Gets the import status string which is shown in the UI.
     /// </summary>
-    public string ImportStatus
+    public string? ImportError
     {
         get;
         set => SetProperty(ref field, value);
-    } = "Awaiting documents";
+    } 
 
     /// <summary>
     /// Gets or sets the overall download progress as a percentage (0-100).
@@ -280,56 +289,70 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// </summary>
     private async Task ImportOrderFilesAsync()
     {
+        ImportError = null;
 
-        // Ask user to pick the files
-        var dialog = new OpenFileDialog
-        {
-            Title = "Select ERP Order Exports",
-            Filter = "CSV Files (*.csv)|*.csv",
-            Multiselect = true,
-            CheckFileExists = true
-        };
+        List<string> newItems;
 
-        // Only procced if they have chosen something
-        if (dialog.ShowDialog() != true)
+        if (_appSettingsService.Settings.DemoMode)
         {
-            return;
+            // Demo mode: use the built-in test documents instead of asking the user to pick files.
+            newItems = new List<string> { _demoDocumentProvider.CsvFileName }
+                .Except(_documentSourceFiles, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        else
+        {
+            // Ask user to pick the files
+            var dialog = new OpenFileDialog
+            {
+                Title = "Select ERP Order Exports",
+                Filter = "CSV Files (*.csv)|*.csv",
+                Multiselect = true,
+                CheckFileExists = true
+            };
+
+            // Only procced if they have chosen something
+            if (dialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            // Check we have new files - we cache them so we can check if come here again.
+            newItems = dialog.FileNames.Except(_documentSourceFiles, StringComparer.OrdinalIgnoreCase).ToList();
         }
 
-        // Check we have new files - we cache them so we can check if come here again.
-        var newItems = dialog.FileNames.Except(_documentSourceFiles, StringComparer.OrdinalIgnoreCase).ToList();
         if (newItems.Count == 0)
         {
             return;
         }
-        
+
         IReadOnlyList<Document> processedDocuments = null;
 
         try
         {
             // Update UI
             IsImportRunning = true;
-            ImportStatus = "Processing documents";
 
             // Carry out the import async.
-            processedDocuments = await _orderImportOrchestrator.ImportAsync(newItems);
+            processedDocuments = _appSettingsService.Settings.DemoMode
+                ? _documentRegisterValidator.Validate(await _demoDocumentProvider.GetDocumentsAsync())
+                : await _orderImportOrchestrator.ImportAsync(newItems);
             IsImportRunning = false;
         }
         catch (NotSupportedException e)
         {
-            ImportStatus = $"Operation failed: {e.Message}";
+            ImportError = $"Invalid file: {e.Message}";
         }
         catch (InvalidDataException e)
         {
-            ImportStatus = $"Operation failed: {e.Message}";
+            ImportError = $"Invalid file: {e.Message}";
         }
         catch (OperationCanceledException e)
         {
-            ImportStatus = $"Operation was cancelled ({e.Message})";
+            ImportError = $"Operation was cancelled ({e.Message})";
         }
         catch (Exception e)
         {
-            ImportStatus = $"Unknown error encountered: ({e.Message})";
+            ImportError = $"Unknown error encountered: ({e.Message})";
         }
         finally
         {
@@ -368,7 +391,7 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// </summary>
     private void CreateFixedDocuments()
     {
-        string modelNumber = Regex.Match(_step.Order.SystemId, @"^(?:E\d+|\d+)", RegexOptions.IgnoreCase).Value;
+        string modelNumber = _step.Order.SystemType;
         var orderFixedDocuments = _catalogueService.GetDocumentsForModel(modelNumber);
         if (orderFixedDocuments.Count == 0)
         {

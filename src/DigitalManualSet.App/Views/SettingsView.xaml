@@ -25,6 +25,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!--  Appearance section: controls related to visual theme selection.  -->
@@ -95,6 +96,44 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
+        <!--  Demo mode toggle.  -->
+        <Border Grid.Row="5" Style="{StaticResource ContainerStyle}">
+            <Grid Margin="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="45" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    Grid.Column="0"
+                    Padding="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontFamily="{StaticResource SymbolThemeFontFamily}"
+                    FontSize="22"
+                    Text="&#xE7F4;" />
+
+                <StackPanel
+                    Grid.Column="1"
+                    Margin="12"
+                    Orientation="Vertical">
+                    <TextBlock FontSize="14" Text="Demo mode" />
+                    <TextBlock
+                        FontSize="12"
+                        Opacity="0.7"
+                        Style="{StaticResource CaptionTextBlockStyle}">
+                        Run the application in demo mode
+                    </TextBlock>
+                </StackPanel>
+
+                <CheckBox
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding IsDemoMode}" />
+            </Grid>
+        </Border>
 
     </Grid>
 </UserControl>

@@ -6,6 +6,8 @@ public class Order
     public string CustomerName { get; }
     public string SystemId { get; }
 
+    public string SystemType { get; set; }
+
     public Order(string orderNumber, string customerName ,string systemId)
     {
         OrderNumber = orderNumber;

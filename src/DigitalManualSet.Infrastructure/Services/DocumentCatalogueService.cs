@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using DigitalManualSet.Core.Models;
+using DigitalManualSet.Core.Orders;
 using DigitalManualSet.Core.Services;
 
 namespace DigitalManualSet.Infrastructure.Services;
@@ -47,8 +48,15 @@ public sealed class DocumentCatalogueService : IDocumentCatalogueService
             return [];
         }
 
+
+        var validId = SystemIdPrefixes.GetPrefix(modelNumber.Trim());
+        if (string.IsNullOrEmpty(validId))
+        {
+            return [];
+        }
+
         return _documentsByModel.TryGetValue(
-            modelNumber.Trim(), out var documents)
+            validId.Trim(), out var documents)
             ? documents
             : [];
     }
