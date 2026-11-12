@@ -95,11 +95,11 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// <summary>
     /// Gets the import status string which is shown in the UI.
     /// </summary>
-    public string ImportStatus
+    public string? ImportError
     {
         get;
         set => SetProperty(ref field, value);
-    } = "Awaiting documents";
+    } 
 
     /// <summary>
     /// Gets or sets the overall download progress as a percentage (0-100).
@@ -280,6 +280,7 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
     /// </summary>
     private async Task ImportOrderFilesAsync()
     {
+        ImportError = null;
 
         // Ask user to pick the files
         var dialog = new OpenFileDialog
@@ -309,7 +310,6 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         {
             // Update UI
             IsImportRunning = true;
-            ImportStatus = "Processing documents";
 
             // Carry out the import async.
             processedDocuments = await _orderImportOrchestrator.ImportAsync(newItems);
@@ -317,19 +317,19 @@ public class ProcessDocumentsViewModel : ViewModel, IPackageWorkflowStepViewMode
         }
         catch (NotSupportedException e)
         {
-            ImportStatus = $"Operation failed: {e.Message}";
+            ImportError = $"Invalid file: {e.Message}";
         }
         catch (InvalidDataException e)
         {
-            ImportStatus = $"Operation failed: {e.Message}";
+            ImportError = $"Invalid file: {e.Message}";
         }
         catch (OperationCanceledException e)
         {
-            ImportStatus = $"Operation was cancelled ({e.Message})";
+            ImportError = $"Operation was cancelled ({e.Message})";
         }
         catch (Exception e)
         {
-            ImportStatus = $"Unknown error encountered: ({e.Message})";
+            ImportError = $"Unknown error encountered: ({e.Message})";
         }
         finally
         {
