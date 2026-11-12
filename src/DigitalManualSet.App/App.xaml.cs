@@ -136,84 +136,60 @@ namespace DigitalManualSet.App
                 builder.AddSerilog();
             });
 
-            // App level
+            // App level: paths, settings, theming and navigation.
             services.AddSingleton<IAppPathProvider>(_appPathProvider);
             services.AddSingleton<AppSettingsService>();
-            services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<AppThemeService>();
-            services.AddSingleton<IPackageWorkflowStepViewModelResolver, PackageWorkflowStepViewModelResolver>();
+            services.AddSingleton<INavigationService, NavigationService>();
 
-            // For debugging use inbuild test data.
-            //services.AddSingleton<IOpenOrderProvider>(
-            //    serviceProvider =>
-            //    {
-            //        var filePath = Path.Combine(
-            //            AppContext.BaseDirectory,
-            //            "TestData",
-            //            "ValidOpenOrders.csv");
-
-            //        return new CsvOpenOrderProvider(filePath);
-            //    });
-
-            // Register the concrete provider so it can be initialised at startup, and expose the
-            // same singleton instance through IOpenOrderProvider for consumers.
+            // Orders: the spreadsheet provider is initialised at startup. IOpenOrderProvider checks
+            // DemoMode on each request, so the toggle takes effect at runtime.
             services.AddSingleton<SpreadsheetOpenOrderProvider>();
-            services.AddSingleton<IOpenOrderProvider>(sp => sp.GetRequiredService<SpreadsheetOpenOrderProvider>());
+            services.AddSingleton<IOpenOrderProvider, DemoModeOpenOrderProvider>();
+            services.AddTransient<IOrderImportOrchestrator, OrderImportOrchestrator>();
 
-            services.AddSingleton<IDocumentProvider>(
-                serviceProvider =>
-                {
-                    var filePath = Path.Combine(
-                        AppContext.BaseDirectory,
-                        "TestData",
-                        "TestDocuments.csv");
-
-                    return new CsvDocumentProvider(filePath);
-                });
-
-            services.AddSingleton<IDocumentRegisterProvider>(_ => new CsvDocumentRegisterProvider(_appPathProvider.MasterDocumentListFilePath));
-
+            // Documents: built-in demo documents, register lookup/validation, download and catalogue.
+            services.AddSingleton<IDocumentProvider>(_ => new CsvDocumentProvider(
+                Path.Combine(AppContext.BaseDirectory, "TestData", "TestDocuments.csv")));
+            services.AddSingleton<IDocumentRegisterProvider>(sp => new DemoModeDocumentRegisterProvider(
+                sp.GetRequiredService<AppSettingsService>(),
+                _appPathProvider.MasterDocumentListFilePath));
             services.AddSingleton<IDocumentRegisterValidator, DocumentRegisterValidator>();
-
-            services.AddSingleton<IRemovableDriveService, RemovableDriveService>();
-
             services.AddSingleton<IDocumentDownloadService>(_ => new LocalDocumentDownloadService(_appPathProvider.TestDocuments));
-
             services.AddSingleton<IDocumentValidationService, DocumentValidationService>();
+            services.AddSingleton<IDocumentCatalogueService>(_ => new DocumentCatalogueService(
+                Path.Combine(_appPathProvider.DocumentsFolder, "documents.json")));
 
-            services.AddSingleton<IDocumentCatalogueService>(_ => new DocumentCatalogueService(Path.Combine(_appPathProvider.DocumentsFolder, "documents.json")));
-
-
-            services.AddSingleton<IAddDocumentDialogService, AddDocumentDialogService>();
-
+            // Package output: generation, validation and removable drive handling.
             services.AddSingleton<IPackageWriter, PackageWriter>();
             services.AddSingleton<IManifestGenerator, ManifestGenerator>();
             services.AddSingleton<ICompletionCertificateGenerator, CompletionCertificateGenerator>();
             services.AddSingleton<ISplashScreenGenerator, SplashScreenGenerator>();
             services.AddSingleton<IPackageValidator, PackageValidator>();
+            services.AddSingleton<IRemovableDriveService, RemovableDriveService>();
             services.AddSingleton<IVolumeRenamer, VolumeRenamer>();
             services.AddSingleton<IRemovableDriveCleaner, RemovableDriveCleaner>();
 
-            services.AddTransient<IOrderImportOrchestrator, OrderImportOrchestrator>();
-
+            // UI services and dialogs.
             services.AddSingleton<IMessageService, MessageService>();
-
             services.AddSingleton<DarkOverlayService>();
-
+            services.AddSingleton<IAddDocumentDialogService, AddDocumentDialogService>();
             services.AddTransient<MessageDialog>();
-
             services.AddTransient<AddDocumentDialog>();
             services.AddTransient<AddDocumentDialogViewModel>();
 
+            // Create package workflow view models.
+            services.AddSingleton<IPackageWorkflowStepViewModelResolver, PackageWorkflowStepViewModelResolver>();
             services.AddTransient<CreatePackageViewModel>();
             services.AddTransient<CreateOrderViewModel>();
             services.AddTransient<ProcessDocumentsViewModel>();
             services.AddTransient<CompletePackageViewModel>();
 
+            // Screen view models.
             services.AddTransient<OpenPackageViewModel>();
             services.AddTransient<SettingsViewModel>();
 
-            // Navigation / screen metadata creation
+            // Shell, navigation and screen registry.
             services.AddSingleton<ShellViewModel>();
             services.AddSingleton<ScreenRegistry>();
             services.AddSingleton<HomeViewModel>();

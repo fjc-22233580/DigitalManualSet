@@ -5,5 +5,8 @@
 /// </summary>
 public interface IScreenViewModel
 {
-    
+    /// <summary>
+    /// Called each time the screen is navigated to.
+    /// </summary>
+    void OnNavigatedTo() { }
 }

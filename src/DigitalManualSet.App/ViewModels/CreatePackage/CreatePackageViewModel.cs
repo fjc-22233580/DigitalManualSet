@@ -149,6 +149,18 @@ public class CreatePackageViewModel : ViewModel, IScreenViewModel
     #region Methods
 
     /// <summary>
+    /// Re-enters the first step when navigated to, so open orders are reloaded (e.g. after toggling demo mode).
+    /// Steps beyond the first are left untouched to preserve in-progress work.
+    /// </summary>
+    public void OnNavigatedTo()
+    {
+        if (_workflow.CurrentIndex == 0)
+        {
+            _ = InitializeCurrentStepAsync();
+        }
+    }
+
+    /// <summary>
     /// Initializes the current step asynchronous.
     /// </summary>
     private async Task InitializeCurrentStepAsync()

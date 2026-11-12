@@ -90,6 +90,24 @@ public class SettingsViewModel : ViewModel, IScreenViewModel
         }
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether demo mode is enabled. Changing this property
+    /// will persist the change asynchronously.
+    /// </summary>
+    public bool IsDemoMode
+    {
+        get => _appSettingsService.Settings.DemoMode;
+        set
+        {
+            if (_appSettingsService.Settings.DemoMode != value)
+            {
+                _appSettingsService.Settings.DemoMode = value;
+                OnPropertyChanged();
+                _ = _appSettingsService.SaveAsync();
+            }
+        }
+    }
+
     #endregion
 
     #region Methods

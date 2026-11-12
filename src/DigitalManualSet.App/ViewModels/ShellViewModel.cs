@@ -84,5 +84,6 @@ public class ShellViewModel : ViewModel
         }
 
         CurrentScreen = screen;
+        screen.ViewModel.OnNavigatedTo();
     }
 }
