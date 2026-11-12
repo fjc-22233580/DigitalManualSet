@@ -66,17 +66,19 @@ public class CsvDocumentProvider : IDocumentProvider
     /// <inheritdoc />
     public async Task<IReadOnlyList<Document>> GetDocumentsAsync(CancellationToken cancellationToken = default)
     {
-        var lines = await File.ReadAllLinesAsync(_filePath, cancellationToken);
+        using var reader = new StreamReader(_filePath);
 
-        if (lines.Length == 0)
+        // Skip the header row.
+        if (await reader.ReadLineAsync(cancellationToken) is null)
         {
             return Array.Empty<Document>();
         }
 
         var documents = new List<Document>();
+        var values = new List<string>();
+        var currentValue = new StringBuilder();
 
-        // Skip the header row.
-        foreach (var line in lines.Skip(1))
+        while (await reader.ReadLineAsync(cancellationToken) is { } line)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -85,7 +87,7 @@ public class CsvDocumentProvider : IDocumentProvider
                 continue;
             }
 
-            var values = ParseLine(line);
+            ParseLine(line, values, currentValue);
 
             // Document parsing for inbuilt dummy documents
             if (_importDefinition is null)
@@ -122,14 +124,14 @@ public class CsvDocumentProvider : IDocumentProvider
                 throw new InvalidDataException($"The CSV row does not contain the configured " + $"columns: '{line}'.");
             }
 
-            var number = values[numberIndex].Trim();
-            var name = values[nameIndex].Trim();
-
             // Only import M, F and HS document references.
-            if (DocumentPrefixes.Any(prefix => number.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) == false)
+            if (!HasDocumentPrefix(values[numberIndex].AsSpan().Trim()))
             {
                 continue;
             }
+
+            var number = values[numberIndex].Trim();
+            var name = values[nameIndex].Trim();
 
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -148,14 +150,15 @@ public class CsvDocumentProvider : IDocumentProvider
     /// Parses a CSV line handling quoted fields and escaped quotes.
     /// </summary>
     /// <param name="line">The CSV line to parse.</param>
-    /// <returns>A read-only list of parsed column values.</returns>
+    /// <param name="values">The list that receives the parsed column values. Cleared before parsing.</param>
+    /// <param name="currentValue">A reusable buffer for building column values. Cleared before parsing.</param>
     /// <exception cref="InvalidDataException">
     /// Thrown when the line contains unmatched quotes.
     /// </exception>
-    private static IReadOnlyList<string> ParseLine(string line)
+    private static void ParseLine(string line, List<string> values, StringBuilder currentValue)
     {
-        var values = new List<string>();
-        var currentValue = new StringBuilder();
+        values.Clear();
+        currentValue.Clear();
         var isInsideQuotes = false;
 
         for (var index = 0; index < line.Length; index++)
@@ -198,7 +201,23 @@ public class CsvDocumentProvider : IDocumentProvider
         }
 
         values.Add(currentValue.ToString());
+    }
 
-        return values;
+    /// <summary>
+    /// Determines whether a document number starts with a supported prefix.
+    /// </summary>
+    /// <param name="number">The trimmed document number.</param>
+    /// <returns><see langword="true" /> when the number starts with F, M or HS.</returns>
+    private static bool HasDocumentPrefix(ReadOnlySpan<char> number)
+    {
+        foreach (var prefix in DocumentPrefixes)
+        {
+            if (number.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
