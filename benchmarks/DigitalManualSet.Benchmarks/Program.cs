@@ -1,19 +1,8 @@
-﻿using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Configs;
+﻿using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Running;
 
 var config = ManualConfig
     .Create(DefaultConfig.Instance)
-    .WithArtifactsPath("output/benchmarks");
+    .WithArtifactsPath(Path.Combine("output", "benchmarks", DateTime.Now.ToString("yyyyMMdd-HHmmss")));
 
-BenchmarkRunner.Run<SimpleBenchmark>(config);
-
-[MemoryDiagnoser]
-public class SimpleBenchmark
-{
-    [Benchmark]
-    public string CreateString()
-    {
-        return "Digital" + "Manual" + "Set";
-    }
-}
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
