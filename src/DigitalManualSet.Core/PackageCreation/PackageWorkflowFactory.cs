@@ -4,6 +4,7 @@ using DigitalManualSet.Core.PackageCreation.Workflow;
 using DigitalManualSet.Core.Services;
 using DigitalManualSet.Core.Workflow;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalManualSet.Core.PackageCreation;
 
@@ -25,8 +26,14 @@ public static class PackageWorkflowFactory
 
         return new Workflow<PackageWorkflowStepId>(
         [
-            new CreateOrderStep(package, serviceProvider.GetRequiredService<IOpenOrderProvider>()),
-            new ProcessDocumentsStep(package, serviceProvider.GetRequiredService<IDocumentProvider>()),
+            new CreateOrderStep(
+                package,
+                serviceProvider.GetRequiredService<IOpenOrderProvider>(),
+                serviceProvider.GetRequiredService<ILogger<CreateOrderStep>>()),
+            new ProcessDocumentsStep(
+                package,
+                serviceProvider.GetRequiredService<IDocumentProvider>(),
+                serviceProvider.GetRequiredService<ILogger<ProcessDocumentsStep>>()),
             new CompletePackageStep(package, serviceProvider)
         ]);
     }
