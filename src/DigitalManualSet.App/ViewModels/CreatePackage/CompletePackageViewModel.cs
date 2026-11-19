@@ -179,6 +179,11 @@ public class CompletePackageViewModel : ViewModel, IPackageWorkflowStepViewModel
     public ObservableCollection<RemovableDrive> AvailableDrives { get; } = [];
 
     /// <summary>
+    /// Gets a value indicating whether any removable drives are available.
+    /// </summary>
+    public bool HasAvailableDrives => AvailableDrives.Count > 0;
+
+    /// <summary>
     /// Gets the human-readable title for this workflow step.
     /// </summary>
     public string Title => "Placeholder: Complete package.";
@@ -389,6 +394,7 @@ public class CompletePackageViewModel : ViewModel, IPackageWorkflowStepViewModel
         }
 
         SelectedDrive = AvailableDrives.Count > 0 ? AvailableDrives[0] : null;
+        OnPropertyChanged(nameof(HasAvailableDrives));
         OnPropertyChanged(nameof(DriveSummary));
     }
 
