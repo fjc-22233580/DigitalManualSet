@@ -1,5 +1,6 @@
 ﻿using DigitalManualSet.Core.Orders;
 using DigitalManualSet.Core.Workflow;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalManualSet.Core.PackageCreation.Workflow;
 
@@ -9,14 +10,16 @@ namespace DigitalManualSet.Core.PackageCreation.Workflow;
 public sealed class CreateOrderStep : WorkflowStep<PackageWorkflowStepId>
 {
     private readonly IOpenOrderProvider _openOrderProvider;
+    private readonly ILogger<CreateOrderStep> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateOrderStep" /> class.
     /// </summary>
-    public CreateOrderStep(Package package, IOpenOrderProvider openOrderProvider)
+    public CreateOrderStep(Package package, IOpenOrderProvider openOrderProvider, ILogger<CreateOrderStep> logger)
         : base(PackageWorkflowStepId.CreateOrder, "Select Order", package)
     {
         _openOrderProvider = openOrderProvider;
+        _logger = logger;
     }
 
     public IReadOnlyList<Order> AvailableOrders { get; private set; } = [];
@@ -39,6 +42,16 @@ public sealed class CreateOrderStep : WorkflowStep<PackageWorkflowStepId>
             await _openOrderProvider.GetOpenOrdersAsync();
 
         ClearOrder();
+    }
+
+    /// <summary>
+    /// Logs the confirmed order. As this is the first step, exiting always means moving forward.
+    /// </summary>
+    public override Task OnExitAsync()
+    {
+        _logger.LogInformation("Package started with {OrderNumber}", Package.Order?.OrderNumber);
+
+        return Task.CompletedTask;
     }
 
 

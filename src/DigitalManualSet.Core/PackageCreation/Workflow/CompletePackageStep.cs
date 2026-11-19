@@ -3,6 +3,7 @@ using DigitalManualSet.Core.Orders;
 using DigitalManualSet.Core.Services;
 using DigitalManualSet.Core.Workflow;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalManualSet.Core.PackageCreation.Workflow;
 
@@ -25,6 +26,7 @@ public class CompletePackageStep : WorkflowStep<PackageWorkflowStepId>
     private readonly ISplashScreenGenerator _splashScreenGenerator;
     private readonly IPackageValidator _packageValidator;
     private readonly IVolumeRenamer _volumeRenamer;
+    private readonly ILogger<CompletePackageStep> _logger;
 
     #endregion
 
@@ -43,6 +45,7 @@ public class CompletePackageStep : WorkflowStep<PackageWorkflowStepId>
         _splashScreenGenerator = serviceProvider.GetRequiredService<ISplashScreenGenerator>();
         _packageValidator = serviceProvider.GetRequiredService<IPackageValidator>();
         _volumeRenamer = serviceProvider.GetRequiredService<IVolumeRenamer>();
+        _logger = serviceProvider.GetRequiredService<ILogger<CompletePackageStep>>();
     }
 
     #region Properties
@@ -162,6 +165,13 @@ public class CompletePackageStep : WorkflowStep<PackageWorkflowStepId>
 
         await _volumeRenamer.RenameAsync(Package.Output.RootPath, $"{Package.Order!.OrderNumber}-DOC", cancellationToken);
         await Task.Delay(StepDelay, cancellationToken);
+
+        _logger.LogInformation(
+            "Package created for {OrderNumber} with {DocumentCount} documents to USB {UsbRootPath} ({UsbModel}), all items validated",
+            Package.Order.OrderNumber,
+            Package.DocumentCount,
+            Package.Output.RootPath,
+            SelectedDrive!.Model);
 
         // All six stages complete
         progress?.Report(new PackageCreationProgress(

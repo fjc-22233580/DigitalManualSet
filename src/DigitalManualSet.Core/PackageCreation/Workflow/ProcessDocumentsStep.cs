@@ -1,6 +1,7 @@
 ﻿using DigitalManualSet.Core.Documents;
 using DigitalManualSet.Core.Orders;
 using DigitalManualSet.Core.Workflow;
+using Microsoft.Extensions.Logging;
 
 namespace DigitalManualSet.Core.PackageCreation.Workflow;
 
@@ -10,16 +11,19 @@ namespace DigitalManualSet.Core.PackageCreation.Workflow;
 public sealed class ProcessDocumentsStep : WorkflowStep<PackageWorkflowStepId>
 {
     private readonly IDocumentProvider _documentProvider;
+    private readonly ILogger<ProcessDocumentsStep> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProcessDocumentsStep"/> class.
     /// </summary>
     /// <param name="package">The package being created.</param>
     /// <param name="documentProvider">The service to retrieve documents.</param>
-    public ProcessDocumentsStep(Package package, IDocumentProvider documentProvider)
+    /// <param name="logger">The logger.</param>
+    public ProcessDocumentsStep(Package package, IDocumentProvider documentProvider, ILogger<ProcessDocumentsStep> logger)
         : base(PackageWorkflowStepId.ProcessDocuments, "Process Documents", package)
     {
         _documentProvider = documentProvider;
+        _logger = logger;
     }
 
     /// <summary>
@@ -68,6 +72,7 @@ public sealed class ProcessDocumentsStep : WorkflowStep<PackageWorkflowStepId>
         if (workingDocuments.All(doc => doc.IsValidated))
         {
             Package.SetValidatedDocuments(workingDocuments);
+            _logger.LogInformation("Package continued with {DocumentCount} documents for {OrderNumber}", Package.DocumentCount, Package.Order?.OrderNumber);
             OnNavigationStateChanged();
         }
     }

@@ -202,13 +202,51 @@
                         </Button>
                     </Grid>
 
+                    <!--  No USB found message  -->
                     <Border
                         Grid.Row="2"
                         Grid.Column="0"
                         Grid.ColumnSpan="2"
                         Margin="0,8,0,0"
                         Padding="8"
-                        Style="{StaticResource ContainerStyle}">
+                        Style="{StaticResource ContainerStyle}"
+                        Visibility="{Binding HasAvailableDrives, Converter={StaticResource BoolToVisibility}, ConverterParameter=True}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="12,0,18,0"
+                                VerticalAlignment="Center"
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="24"
+                                Foreground="#7A4A00"
+                                Text="&#xE7BA;" />
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock
+                                    FontSize="16"
+                                    FontWeight="SemiBold"
+                                    Text="No USB drives found" />
+                                <TextBlock
+                                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                    Text="Insert a USB drive and click the refresh button to try again."
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Margin="0,8,0,0"
+                        Padding="8"
+                        Style="{StaticResource ContainerStyle}"
+                        Visibility="{Binding HasAvailableDrives, Converter={StaticResource BoolToVisibility}}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
